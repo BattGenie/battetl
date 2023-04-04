@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name, BG_MBC_eta0p025_Cell3_Take2, Serial Number,, C:\Users\Arbin\Desktop\ZN_temp\BG_MBC_eta0p025_Cell3_Take2_2022_08_23_161330,,,,,,,,
+,,Export Time,02/07/2023 12:58:11,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+27,08/23/2022 16:13:31,BG\BG_MBC_eta0p025_25R+BG_25R.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,2.5,,512,0,True,False

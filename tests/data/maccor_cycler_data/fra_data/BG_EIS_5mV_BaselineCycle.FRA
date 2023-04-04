@@ -1,0 +1,18 @@
+[General]
+Comment=
+FRAType=3
+[Setup]
+Mode=0
+DataQuality=1
+MeasDelay=0
+Range=200 mA
+BandWidth=AUTO
+Potential=0
+PotentialVs=-1
+[Limits]
+Current=4
+[Sweep]
+Amplitude=5
+InitFreq=100000
+EndFreq=.001
+StepPerDec=10

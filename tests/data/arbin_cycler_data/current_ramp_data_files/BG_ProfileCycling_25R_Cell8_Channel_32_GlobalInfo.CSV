@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name, BG_ProfileCycling_25R_Cell8, Serial Number,, tests\BG_ProfileCycling_25R_Cell8_2022_05_19_183002,,,,,,,,
+,,Export Time,02/07/2023 13:09:14,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+32,05/20/2022 18:30:03,BG\BG_ProfileCycling_25R+BG_25R.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,2.5,,512,0,True,False
