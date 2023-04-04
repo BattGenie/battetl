@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name, BG_MBC_CAN_Control_Cell58_Take10, Serial Number,, tests\BG_MBC_CAN_Control_Cell58_Take10_2022_11_08_015703,,,,,,,,
+,,Export Time,02/07/2023 13:28:50,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+29,11/08/2022 01:57:04,BG\BG_MBC_Cycling_ZN_TEST+BG_ATL-GC-SDC-2854A6-020H+model_control_channel_29.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,2.65,,512,0,False,True

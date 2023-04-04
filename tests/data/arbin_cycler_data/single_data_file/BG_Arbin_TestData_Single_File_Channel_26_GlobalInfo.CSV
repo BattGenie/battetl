@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name, BG_Characterization_25R_Cell_2, Serial Number,, C:\Users\Arbin\Desktop\BG\BG_Characterization_25R_Cell_2_2022_05_22_124258,,,,,,,,
+,,Export Time,06/01/2022 14:47:10,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+26,05/22/2022 12:42:59,BG\BG_25R_Characterization+BG_25R.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,2.5,,512,0,True,False

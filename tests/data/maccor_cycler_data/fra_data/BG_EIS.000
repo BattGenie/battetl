@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?maccor-application progid="Maccor Procedure File"?>
+<MaccorTestProcedure>
+  <header>
+    <BuildTestVersion>
+      <major>1</major>
+      <minor>5</minor>
+      <release>7062</release>
+      <build>52611</build>
+    </BuildTestVersion>
+    <FileFormatVersion>
+      <BTVersion>11</BTVersion>
+    </FileFormatVersion>
+    <ProcDesc>
+      <desc>EIS Measurement</desc>
+    </ProcDesc>
+  </header>
+  <ProcSteps>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>003</Step>
+          <Value>00:00:10</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+          <ChanSafetyEnd>True</ChanSafetyEnd>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+          <ChanSafetyEnd>True</ChanSafetyEnd>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.05C</Value>
+          <ChanSafetyEnd>True</ChanSafetyEnd>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Amp Hour</EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.1C</Value>
+          <ChanSafetyEnd>True</ChanSafetyEnd>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:00:05</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType> Pause  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends/>
+      <Reports/>
+      <Range></Range>
+      <Option1></Option1>
+      <Option2></Option2>
+      <Option3></Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType> Charge </StepType>
+      <StepMode>Current </StepMode>
+      <StepValue>0.5C</StepValue>
+      <Limits>
+        <Voltage>4.4</Voltage>
+      </Limits>
+      <Ends>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>004</Step>
+          <Value>0.05C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.05C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Amp Hour</EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.1C</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+        <ReportEntry>
+          <ReportType>Voltage </ReportType>
+          <Value>0.02</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>005</Step>
+          <Value>04:00:00</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  FRA   </StepType>
+      <StepMode>        </StepMode>
+      <StepValue>BG_EIS_5mV_BaselineCycle</StepValue>
+      <Limits/>
+      <Ends/>
+      <Reports/>
+      <Range></Range>
+      <Option1></Option1>
+      <Option2></Option2>
+      <Option3></Option3>
+      <StepNote>--- 100% SoC EIS Measurement</StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>007</Step>
+          <Value>00:10:00</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>Dischrge</StepType>
+      <StepMode>Current </StepMode>
+      <StepValue>0.2C</StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>Amp Hour</EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>008</Step>
+          <Value>0.5C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>3.0</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.05C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Amp Hour</EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.1C</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+        <ReportEntry>
+          <ReportType>Voltage </ReportType>
+          <Value>0.02</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>009</Step>
+          <Value>04:00:00</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  FRA   </StepType>
+      <StepMode>        </StepMode>
+      <StepValue>BG_EIS_5mV_BaselineCycle</StepValue>
+      <Limits/>
+      <Ends/>
+      <Reports/>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote>--- 100% SoC EIS Measurement
+--- 50% SoC EIS Measurement</StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>011</Step>
+          <Value>00:10:00</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>Dischrge</StepType>
+      <StepMode>Current </StepMode>
+      <StepValue>0.2C</StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>012</Step>
+          <Value>3.0</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.05C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Amp Hour</EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.1C</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+        <ReportEntry>
+          <ReportType>Voltage </ReportType>
+          <Value>0.02</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>013</Step>
+          <Value>04:00:00</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  FRA   </StepType>
+      <StepMode>        </StepMode>
+      <StepValue>BG_EIS_5mV_BaselineCycle</StepValue>
+      <Limits/>
+      <Ends/>
+      <Reports/>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  Rest  </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends>
+        <EndEntry>
+          <EndType>StepTime</EndType>
+          <SpecialType> </SpecialType>
+          <Oper> = </Oper>
+          <Step>015</Step>
+          <Value>00:10:00</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType> Charge </StepType>
+      <StepMode>Current </StepMode>
+      <StepValue>0.2C</StepValue>
+      <Limits>
+        <Voltage>3.7</Voltage>
+      </Limits>
+      <Ends>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>016</Step>
+          <Value>0.05C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>4.45</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Voltage </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&lt;= </Oper>
+          <Step>002</Step>
+          <Value>2.9</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Current </EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.05C</Value>
+        </EndEntry>
+        <EndEntry>
+          <EndType>Amp Hour</EndType>
+          <SpecialType> </SpecialType>
+          <Oper>&gt;= </Oper>
+          <Step>002</Step>
+          <Value>1.1C</Value>
+        </EndEntry>
+      </Ends>
+      <Reports>
+        <ReportEntry>
+          <ReportType>StepTime</ReportType>
+          <Value>00:02:00</Value>
+        </ReportEntry>
+        <ReportEntry>
+          <ReportType>Voltage </ReportType>
+          <Value>0.02</Value>
+        </ReportEntry>
+      </Reports>
+      <Range>A</Range>
+      <Option1>N</Option1>
+      <Option2>N</Option2>
+      <Option3>N</Option3>
+      <StepNote></StepNote>
+    </TestStep>
+    <TestStep>
+      <StepType>  End   </StepType>
+      <StepMode>        </StepMode>
+      <StepValue></StepValue>
+      <Limits/>
+      <Ends/>
+      <Reports/>
+      <Range></Range>
+      <Option1></Option1>
+      <Option2></Option2>
+      <Option3></Option3>
+      <StepNote></StepNote>
+    </TestStep>
+  </ProcSteps>
+</MaccorTestProcedure>
