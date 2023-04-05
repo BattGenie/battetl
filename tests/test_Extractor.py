@@ -160,7 +160,7 @@ def test_extract_arbin_globalinfo():
 @pytest.mark.maccor
 @pytest.mark.schedules
 def test_extract_maccor_simple_procedure():
-    procedure_file_name = 'BG_Characterization.000'
+    procedure_file_name = 'BG_Maccor_Schedule.000'
     path = join(MACCOR_SIMPLE_PATH, procedure_file_name)
 
     extractor = Extractor()
