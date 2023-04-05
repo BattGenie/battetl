@@ -166,7 +166,7 @@ def test_calc_maccor_cycle_stats():
     data_path = join(MACCOR_SIMPLE_PATH, 'BG_Maccor_TestData - 079.pkl')
     stat_path = join(MACCOR_SIMPLE_PATH,
                      'BG_Maccor_TestData - 079 [STATS].pkl')
-    schedule_path = join(MACCOR_SIMPLE_PATH, 'BG_Characterization.000')
+    schedule_path = join(MACCOR_SIMPLE_PATH, 'BG_Maccor_Schedule.000')
 
     extractor = Extractor()
     df_data_raw = extractor.from_pickle(data_path)
