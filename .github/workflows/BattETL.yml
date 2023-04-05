@@ -86,11 +86,19 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run -m pytest -vv
-          coverage xml
+          coverage json
+          export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+          echo "total=$TOTAL" >> $GITHUB_ENV
+          echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
         
-      - name: Publish coverage report
-        uses: github-actions-x/coverage.py@1
+      - name: Make badge
+        uses: schneegans/dynamic-badges-action@v1.4.0
         with:
-          token: ${{ secrets.GIST_TOKEN }}
-          gist_id: ${{ secrets.GIST_ID }}
-          file: coverage.xml
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: covbadge.json
+          label: Coverage
+          message: ${{ env.total }}%
+          minColorRange: 50
+          maxColorRange: 90
+          valColorRange: ${{ env.total }}
