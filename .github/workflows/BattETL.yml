@@ -60,11 +60,11 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Check out BattGenie/db_bg_cell_testing_main
+      - name: Check out BattGenie/battdb
         uses: actions/checkout@v3
         with:
-          repository: BattGenie/db_bg_cell_testing_main
-          ssh-key: ${{ secrets.db_bg_cell_testing_main_deploy_key }}
+          repository: BattGenie/battdb
+          ssh-key: ${{ secrets.battdb_deploy_key }}
           path: "sqls"
 
       - name: Install Flyway
@@ -74,7 +74,7 @@ jobs:
 
       - name: Run Flyway migrate
         run: |
-          flyway migrate -url=jdbc:postgresql://localhost:5432/db_test -user=postgres -password=postgres -locations=sqls/migration_scripts
+          flyway migrate -url=jdbc:postgresql://localhost:5432/db_test -user=postgres -password=postgres -locations=sqls/assets/migration_scripts
 
       - name: Create env file
         run: |
@@ -96,7 +96,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.GIST_ID }}
-          filename: covbadge.json
+          filename: battetl_coverage_badge.json
           label: Coverage
           message: ${{ env.total }}%
           minColorRange: 50
