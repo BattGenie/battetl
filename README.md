@@ -8,7 +8,7 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
 
 There are published [open](https://github.com/TRI-AMDD/beep) [source](https://github.com/Battery-Intelligence-Lab/galvanalyser) solutions for battery cycler data ingestion. BattETL hopes to build on these tools and adds a few conveniences to support robust data management and repeatable data analytics.
 
-Some features of BattETL:
+### Some features of BattETL
 
 - **A relational data destination.**
 
