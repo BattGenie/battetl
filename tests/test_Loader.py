@@ -8,7 +8,6 @@ from battetl.load import Loader
 from loader_test_helper import LoaderTestHelper
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), 'configs')
-TARGET_DB = "test_db"
 
 
 class Values:
@@ -51,7 +50,7 @@ def test_lookup_cell_type_id():
     config = deepcopy(Values.CONFIG_1)
 
     # Lookup existing cell_type_id
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id == Values.TEST_HELPER.cell_type_id)
     del loader
@@ -59,7 +58,7 @@ def test_lookup_cell_type_id():
     # Lookup non-existent cell_type_id
     config['meta_data']['cell_meta']['manufacturer'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cell_meta']['manufacturer_pn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id is None)
 
@@ -71,14 +70,14 @@ def test_lookup_cell_id():
     config = deepcopy(Values.CONFIG_1)
 
     # Lookup existing cell id
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_id = loader._Loader__lookup_cell_id()
     assert (cell_id == Values.TEST_HELPER.cell_id)
     del loader
 
     # Lookup non-existent cell_id
     config['meta_data']['cell']['manufacturer_sn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_id = loader._Loader__lookup_cell_id()
     assert (cell_id is None)
 
@@ -90,14 +89,14 @@ def test_lookup_schedule_id():
     config = deepcopy(Values.CONFIG_1)
 
     # Lookup existing schedule id
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     schedule_id = loader._Loader__lookup_schedule_id()
     assert (schedule_id == Values.TEST_HELPER.schedule_id)
     del loader
 
     # Lookup non-existent schedule_id
     config['meta_data']['schedule_meta']['schedule_name'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     schedule_id = loader._Loader__lookup_schedule_id()
     assert (schedule_id is None)
 
@@ -109,7 +108,7 @@ def test_lookup_cycler_type_id():
     config = deepcopy(Values.CONFIG_1)
 
     # Lookup existing cycler type id
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id == Values.TEST_HELPER.cycler_type_id)
     del loader
@@ -117,7 +116,7 @@ def test_lookup_cycler_type_id():
     # Lookup non-existent schedule_id
     config['meta_data']['cycler_meta']['manufacturer'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cycler_meta']['model'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id is None)
     del loader
@@ -130,14 +129,14 @@ def test_lookup_cycler_id():
     config = deepcopy(Values.CONFIG_1)
 
     # Lookup existing cycler id
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_id = loader._Loader__lookup_cycler_id()
     assert (cycler_id == Values.TEST_HELPER.cycler_id)
     del loader
 
     # Lookup non-existing cycler with existing cycler_type_id
     config['meta_data']['cycler']['sn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_id = loader._Loader__lookup_cycler_id()
     assert (cycler_id is None)
     del loader
@@ -150,14 +149,14 @@ def test_lookup_test_id():
     config = deepcopy(Values.CONFIG_1)
 
     # Lookup existing test id
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     test_id = loader._Loader__lookup_test_id()
     assert (test_id == Values.TEST_HELPER.test_id)
     del loader
 
     # Lookup non-existent test.
     config['meta_data']['test_meta']['test_name'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     test_id = loader._Loader__lookup_test_id()
     assert (test_id is None)
     del loader
@@ -172,7 +171,7 @@ def test_lookup_latest_unixtime():
     Values.TEST_HELPER.delete_test_data()
 
     # Lookup unixtime_s for an existing test with no data in data table.
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     latest_unixtime_s = loader._Loader__lookup_latest_unixtime()
     assert (latest_unixtime_s is None)
 
@@ -205,7 +204,7 @@ def test_lookup_latest_unixtime():
 
     # Lookup unixtime_s for a non-existent test with no data in data table.
     config['meta_data']['test_meta']['test_name'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     latest_unixtime_s = loader._Loader__lookup_latest_unixtime()
     assert (latest_unixtime_s is None)
 
@@ -219,7 +218,7 @@ def test_lookup_latest_cycle():
     Values.TEST_HELPER.delete_test_data()
 
     # Lookup latest cycle for a test that does not have data.
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     latest_cycle = loader._Loader__lookup_latest_cycle()
     assert (latest_cycle is None)
 
@@ -247,7 +246,7 @@ def test_lookup_latest_cycle():
 
     # Lookup cycle for a test that does not exist.
     config['meta_data']['test_meta']['test_name'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     latest_cycle = loader._Loader__lookup_latest_cycle()
     assert (latest_cycle is None)
 
@@ -277,7 +276,7 @@ def test_load_test_data_small_dataset():
     df = pd.DataFrame(data=data_dict)
 
     # Load data
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     num_loaded_rows = loader.load_test_data(df)
     assert (num_loaded_rows == 2)
 
@@ -295,7 +294,7 @@ def test_load_test_data_small_dataset():
         if key == 'other_1' or key == 'other_2':
             # The other_1 and other_2 columns are stored as JSON strings.
             sq_dict_other_detail = [row for row in sql_dict['other_detail']]
-            assert(sq_dict_other_detail == pd_other_detail)
+            assert (sq_dict_other_detail == pd_other_detail)
         else:
             assert (data_dict[key] == sql_dict[key])
 
@@ -336,8 +335,9 @@ def test_load_test_data_small_dataset():
     # Verify loaded data against all reference data.
     for key in data_dict_combined.keys():
         if key == 'other_1' or key == 'other_2':
-            sq_dict_other_detail = [row if row else None for row in sql_dict['other_detail']]
-            assert(pd_other_detail_combined == pd_other_detail_combined)
+            sq_dict_other_detail = [
+                row if row else None for row in sql_dict['other_detail']]
+            assert (pd_other_detail_combined == pd_other_detail_combined)
         else:
             assert (data_dict_combined[key] == sql_dict[key])
 
@@ -363,7 +363,7 @@ def test_load_cycle_stats_small_dataset():
     df = pd.DataFrame(data=data_dict)
 
     # Load data
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     num_loaded_rows = loader.load_cycle_stats(df)
     assert (num_loaded_rows == 2)
 
@@ -382,7 +382,7 @@ def test_load_cycle_stats_small_dataset():
         'reported_coulombic_efficiency': [0.95, 0.96]
     }
     df = pd.DataFrame(data=data_dict)
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     num_loaded_rows = loader.load_cycle_stats(df)
     assert (num_loaded_rows == 2)
 
@@ -392,7 +392,6 @@ def test_load_cycle_stats_small_dataset():
     sql_dict = df_sql.to_dict(orient='list')
     for key in data_dict.keys():
         assert (data_dict[key] == sql_dict[key])
-
 
     # Define more data to insert and load it
     new_data_dict = {
@@ -425,7 +424,7 @@ def test_insert_cycler_meta():
 
     # Load new cycler meta
     config['meta_data']['cycler_meta']['model'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_type_id = loader._Loader__insert_cycler_meta()
     assert (cycler_type_id)
 
@@ -452,7 +451,7 @@ def test_insert_cycler():
 
     # Test inserting a cycler with a cycler_type_id that already exists.
     config['meta_data']['cycler']['sn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id)
     cycler_id = loader._Loader__insert_cycler()
@@ -476,7 +475,7 @@ def test_insert_cycler():
     config['meta_data']['cycler_meta']['manufacturer'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cycler_meta']['model'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cycler']['sn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id is None)
     cycler_id = loader._Loader__insert_cycler()
@@ -509,7 +508,7 @@ def test_insert_cell_meta():
     # Insert non-existing cell_meta.
     config['meta_data']['cell_meta']['manufacturer'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cell_meta']['manufacturer_pn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id is None)
     cell_type_id = loader._Loader__insert_cell_meta()
@@ -539,7 +538,7 @@ def test_insert_cell():
 
     # Test inserting a cell with a cell_type_id that already exists.
     config['meta_data']['cell']['manufacturer_sn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id)
     cell_id = loader._Loader__insert_cell()
@@ -562,7 +561,7 @@ def test_insert_cell():
     config['meta_data']['cell_meta']['manufacturer'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cell_meta']['manufacturer_pn'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cell']['manufacturer_sn'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id is None)
     cell_id = loader._Loader__insert_cell()
@@ -594,7 +593,7 @@ def test_insert_schedule_meta():
 
     # Insert a new schedule
     config['meta_data']['schedule_meta']['schedule_name'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     schedule_id = loader._Loader__lookup_schedule_id()
     assert (schedule_id is None)
     schedule_id = loader._Loader__insert_schedule_meta()
@@ -620,7 +619,7 @@ def test_insert_test_meta():
 
     # Test inserting a test with a cell, schedule, and cycler that already exist
     config['meta_data']['test_meta']['test_name'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
     cell_id = loader._Loader__lookup_cell_id()
     assert (cell_id)
     schedule_id = loader._Loader__lookup_schedule_id()
@@ -657,7 +656,7 @@ def test_insert_test_meta():
     config['meta_data']['cycler']['sn'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cycler_meta']['manufacturer'] = Values.TEST_HELPER.generate_random_string()
     config['meta_data']['cycler_meta']['model'] = Values.TEST_HELPER.generate_random_string()
-    loader = Loader(TARGET_DB, config)
+    loader = Loader(config)
 
     # Make sure no fields existed before.
     assert (loader._Loader__lookup_cell_id() is None)

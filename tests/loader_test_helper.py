@@ -20,7 +20,7 @@ class LoaderTestHelper(battetl.load.Loader):
         '''
         Various methods for helping loader tests.
         '''
-        super().__init__(self, config)
+        super().__init__(config)
         self.config = config['meta_data']
         assert (self._Loader__create_connection())
 

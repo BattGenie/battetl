@@ -31,7 +31,6 @@ class BattETL:
             - `data_file_path` - Absolute or relative path to the test data file.
             - `stats_file_path` - Absolute or relative path to the cycle stats data file.
             - `schedule_file_path` - Absolute or relative path to the schedule or procedure file.
-            - `target_database` - Name of the database to load the data into.
             - `meta_data` - Dictionary containing the meta data for the test.
 
         user_transform_test_data : Callable[[pd.DataFrame], pd.DataFrame], optional
@@ -166,29 +165,27 @@ class BattETL:
             The number of rows inserted into the target_table. 
         """
 
-        for target_db in self.config['target_databases']:
-            loader = Loader(
-                target_db=target_db,
-                config=self.config,
-                env_path=self.env_path)
+        loader = Loader(
+            config=self.config,
+            env_path=self.env_path)
 
-            # Load test data
-            if not self.test_data.empty:
-                num_rows_inserted_test_data = loader.load_test_data(self.test_data)
-                logger.info(
-                    f'Loaded {num_rows_inserted_test_data} rows of test data to {target_db}')
-            else:
-                logger.warning('No test data to load.')
+        # Load test data
+        if not self.test_data.empty:
+            num_rows_inserted_test_data = loader.load_test_data(self.test_data)
+            logger.info(
+                f'Loaded {num_rows_inserted_test_data} rows of test data to database!')
+        else:
+            logger.warning('No test data to load.')
 
-            # Load cycle stats
-            if not self.cycle_stats.empty:
-                num_rows_inserted_cycle_stats = loader.load_cycle_stats(
-                    self.cycle_stats)
-                logger.info(
-                    f'Loaded {num_rows_inserted_cycle_stats} rows of cycle stats to {target_db}')
-            else:
-                logger.warning('No cycle stats to load.')
+        # Load cycle stats
+        if not self.cycle_stats.empty:
+            num_rows_inserted_cycle_stats = loader.load_cycle_stats(
+                self.cycle_stats)
+            logger.info(
+                f'Loaded {num_rows_inserted_cycle_stats} rows of cycle stats to database')
+        else:
+            logger.warning('No cycle stats to load.')
 
-            del loader
+        del loader
 
         return self

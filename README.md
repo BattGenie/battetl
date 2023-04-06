@@ -102,9 +102,6 @@ To use BattETL it is necessary to provide a path to JSON configuration file. Thi
     "schedule_file_path": [
         "data/fake_schedule.001"
     ],
-    "target_databases": [
-        "test_db"
-    ],
     "meta_data": {
         "test_meta": {
             "test_name": "TEST_Cell1_Take1",
@@ -266,9 +263,6 @@ Before running the `load` module, copy `.env.example` to `.env` and modify the p
 ```python
 from battetl.extract import Loader
 
-# Database to load data to.
-target_database = "test_database"
-
 # Config describing test parameters
 config = {
     "test_meta":
@@ -299,7 +293,7 @@ config = {
         }
 }
 
-loader = Loader(target_database, config)
+loader = Loader(config)
 
 # Where `test_data_df` is a DataFrame that conforms to `test_data` columns and data types
 loader.load_test_data(test_data_df)

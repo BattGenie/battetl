@@ -22,7 +22,6 @@ from battetl import logger, Constants, Utils
 class Loader:
     def __init__(
             self,
-            target_db: str,
             config: dict,
             env_path: str = os.path.join(os.getcwd(), '.env')):
         """
@@ -30,9 +29,6 @@ class Loader:
 
         Parameters
         ----------
-        target_db : str
-            The target database to load data to. Database must have schema 
-            in accordance with TODO: POINT TO DATABASE SCHEMA EXAMPLE.
         config : dict
             A configuration file containing meta_data about the test data.
         env_path : str, optional
