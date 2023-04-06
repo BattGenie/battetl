@@ -6,7 +6,7 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
 
 ### Why another battery cycler data ingesting tool?
 
-There are published [open](https://github.com/TRI-AMDD/beep) [source](https://github.com/Battery-Intelligence-Lab/galvanalyser) solutions for battery cycler data ingestion. BattETL hopes to build on these tools and adds a few conveniences to support robust data management and repeatable data analytics:
+There are published [open](https://github.com/TRI-AMDD/beep) [source](https://github.com/Battery-Intelligence-Lab/galvanalyser) solutions for battery cycler data ingestion. BattETL hopes to build on these tools and adds a few conveniences to support robust data management and repeatable data analytics.
 
 Some features of BattETL:
 
@@ -57,7 +57,7 @@ For Data Records:
 - Voltage : Header Label of Voltage(V), Units of Volts
 - DPT Time : Header label of DPt Time
 
-<img src="./images/MaccorExport_DataRecords.png">
+<img src="./images/MaccorExport_DataRecords.png" width="85%" height="50%">
 
 For Cycle Statistics:
 
@@ -66,13 +66,13 @@ For Cycle Statistics:
 - Capacity Dis : Header label AH-Out, Units of Ahr
 - DPT Time : Header Label of DPt Time
 
-<img src="./images/MaccorExport_CycleStats.png">
+<img src="./images/MaccorExport_CycleStats.png" width="85%" height="50%">
 
 ### Arbin
 
 Within the Arbin Export tool the "File Type" should be set to "To CSV". Within "Data Filter" the box "statistics by Cycle" should be checked along with any other data. For range filter "All" should be selected.
 
-<img src="./images/ArbinExport.png">
+<img src="./images/ArbinExport.jpg" width="45%" height="25%">
 
 ## Usage
 
