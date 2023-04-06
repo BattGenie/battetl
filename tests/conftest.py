@@ -29,9 +29,6 @@ def cell_config():
         "schedule_file_path": [
             "tests/data/maccor_cycler_data/simple_data/BG_Maccor_Schedule.000"
         ],
-        "target_databases": [
-            "test_db"
-        ],
         "meta_data": {
             "test_meta": {
                 "test_name": "test_test",
