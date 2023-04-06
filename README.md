@@ -2,7 +2,7 @@
 
 BattETL is a well-tested and an enterprise-ready python module for **E**xtracting, **T**ransforming, and **L**oading battery cycler data to a [database](https://github.com/BattGenie/battdb). BattETL can also be used just for data extraction and transformation if a database is not desired. Currently data from Maccor and Arbin cyclers are supported.
 
-<img src="./diagrams/BattETL_Simple_System.svg">
+<img src="./images/BattETL_Simple_System.svg">
 
 ### Why another battery cycler data ingesting tool?
 
@@ -24,7 +24,7 @@ As part of the transformation step BattETL calculates various cycle statistics (
 
 ### System diagram of BattETL and BattDB
 
-<img src="./diagrams/BattETL_SystemDiagram.svg">
+<img src="./images/BattETL_SystemDiagram.svg">
 
 ## Requirements
 
@@ -57,16 +57,22 @@ For Data Records:
 - Voltage : Header Label of Voltage(V), Units of Volts
 - DPT Time : Header label of DPt Time
 
+<img src="./images/MaccorExport_DataRecords.png">
+
 For Cycle Statistics:
 
-Cycle : Header Label of Cycle
-Capacity Chg : Header label AH-IN, Units of Ahr
-Capacity Dis : Header label AH-Out, Units of Ahr
-DPT Time : Header Label of DPt Time
+- Cycle : Header Label of Cycle
+- Capacity Chg : Header label AH-IN, Units of Ahr
+- Capacity Dis : Header label AH-Out, Units of Ahr
+- DPT Time : Header Label of DPt Time
+
+<img src="./images/MaccorExport_CycleStats.png">
 
 ### Arbin
 
 Within the Arbin Export tool the "File Type" should be set to "To CSV". Within "Data Filter" the box "statistics by Cycle" should be checked along with any other data. For range filter "All" should be selected.
+
+<img src="./images/ArbinExport.png">
 
 ## Usage
 
