@@ -1,7 +1,6 @@
 import os
 import copy
 import json
-import dotenv
 import psycopg2
 import psycopg2.pool
 import psycopg2.sql
@@ -9,7 +8,7 @@ import sqlalchemy
 import sqlalchemy.orm
 import numpy as np
 import pandas as pd
-from schema import Schema, And, Use, Optional, SchemaError
+from schema import Schema, Use, Optional, SchemaError
 
 # progress bar
 from tqdm import tqdm
