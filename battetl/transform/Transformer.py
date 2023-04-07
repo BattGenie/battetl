@@ -1,4 +1,3 @@
-import os
 import re
 import numpy as np
 import pandas as pd
@@ -14,8 +13,7 @@ class Transformer:
             user_transform_test_data: Callable[[
                 pd.DataFrame], pd.DataFrame] = None,
             user_transform_cycle_stats: Callable[[
-                pd.DataFrame], pd.DataFrame] = None,
-            env_path: str = os.path.join(os.getcwd(), '.env')) -> None:
+                pd.DataFrame], pd.DataFrame] = None) -> None:
         """
         An interface to transform battery test data to BattETL schema.
 
@@ -30,12 +28,7 @@ class Transformer:
         user_transform_cycle_stats : Callable[[pd.DataFrame], pd.DataFrame], optional
             A user defined function to transform cycle stats. The function should take a pandas.DataFrame
             as input and return a pandas.DataFrame as output.
-        env_path : str, optional
-            Path to the .env file containing the environment variables. The default is the current working
-            directory.
         """
-        Utils.load_env(env_path)
-
         # Default 'America/Los_Angeles'.
         self.timezone = timezone if timezone else Constants.DEFAULT_TIME_ZONE
         self.user_transform_test_data = user_transform_test_data

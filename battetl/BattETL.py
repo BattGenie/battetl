@@ -65,7 +65,7 @@ class BattETL:
         self : BattETL
             Returns a reference to the instance object
         """
-        extractor = Extractor(env_path=self.env_path)
+        extractor = Extractor()
 
         # Test data
         if self.config.get('data_file_path'):
@@ -116,8 +116,7 @@ class BattETL:
         transformer = Transformer(
             timezone=self.config.get('timezone'),
             user_transform_test_data=self.user_transform_test_data,
-            user_transform_cycle_stats=self.user_transform_cycle_stats,
-            env_path=self.env_path)
+            user_transform_cycle_stats=self.user_transform_cycle_stats)
 
         if not self.raw_test_data.empty:
             try:
