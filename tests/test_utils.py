@@ -6,7 +6,7 @@ from pathlib import Path
 from battetl import Utils
 
 CONFIG_DIR = Path(__file__).parent / 'configs'
-ENV_PATH = Path(__file__).parent.parent / '.env.example'
+ENV_PATH = Path(__file__).parent / '.env.example'
 
 
 @pytest.mark.utils
