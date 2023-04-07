@@ -4,7 +4,7 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
 
 <img src="./images/BattETL_Simple_System.svg">
 
-### Overviews
+### Overview
 
 - [Motivation](#motivation)
 - [Installation](#installation)
