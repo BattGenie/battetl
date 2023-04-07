@@ -178,8 +178,7 @@ paths = [
 
 extractor.schedule_from_files(paths)
 
-maccor_procedure = self.self.maccor_procedure
-arbin_schedule = self.arbin_schedule
+schedule = extractor.self.schedule
 ```
 
 #### Functions
