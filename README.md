@@ -100,28 +100,28 @@ To use BattETL it is necessary to provide a path to JSON configuration file. Thi
 {
     "timezone": "America/Los_Angeles",
     "data_file_path": [
-        "data/test_data.txt"
+        "abs/path/to/your/arbin/or/maccor/test/data/file(s).txt"
     ],
     "stats_file_path": [
-        "data/test_stats.txt"
+        "abs/path/to/your/arbin/or/maccor/test/stats/file.txt"
     ],
     "schedule_file_path": [
-        "data/fake_schedule.001"
+        "abs/path/to/your/schedule/or/procedure/file(s).000"
     ],
     "meta_data": {
         "test_meta": {
-            "test_name": "TEST_Cell1_Take1",
-            "channel": 1
+            "test_name": "the_name_of_your_test",
+            "channel": 10
         },
         "cell": {
-            "manufacturer_sn": "123456"
+            "manufacturer_sn": "0001"
         },
         "cell_meta": {
             "manufacturer": "FakeMN",
             "manufacturer_pn": "1234"
         },
         "schedule_meta": {
-            "schedule_name": "fake_schedule.001",
+            "schedule_name": "fake_schedule.000",
             "cycler_make": "BattGenie"
         },
         "cycler": {
@@ -135,6 +135,8 @@ To use BattETL it is necessary to provide a path to JSON configuration file. Thi
 }
 ```
 
+An example notebook `battetl_demo.ipynb` that provides a tool to help generate config files is located in the `examples` directory. 
+
 #### BattETL Class Instance Objects
 
 After running BattETL on a specific configuration file the following objects will be available as class variables from the instance:
@@ -147,7 +149,7 @@ After running BattETL on a specific configuration file the following objects wil
 
 ***Example Notebook***
 
-For a practical implementation of `BattETL`, please refer to the example notebook `load_data.ipynb` located in the `tests/data` directory. This notebook demonstrates how to implement `BattETL` and can serve as a useful reference for your own project.
+For a practical implementation of `BattETL`, please refer to the example notebook `battetl_demo.ipynb` located in the `examples` directory. This notebook demonstrates how to implement `BattETL` and can serve as a useful reference for your own project.
 
 ### Extractor
 

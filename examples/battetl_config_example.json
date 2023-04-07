@@ -1,0 +1,36 @@
+{
+    "timezone": "America/Los_Angeles",
+    "data_file_path": [
+        "abs/path/to/your/arbin/or/maccor/test/data/file(s).txt"
+    ],
+    "stats_file_path": [
+        "abs/path/to/your/arbin/or/maccor/test/stats/file.txt"
+    ],
+    "schedule_file_path": [
+        "abs/path/to/your/schedule/or/procedure/file(s).000"
+    ],
+    "meta_data": {
+        "test_meta": {
+            "test_name": "the_name_of_your_test",
+            "channel": 10
+        },
+        "cell": {
+            "manufacturer_sn": "0001"
+        },
+        "cell_meta": {
+            "manufacturer": "FakeMN",
+            "manufacturer_pn": "1234"
+        },
+        "schedule_meta": {
+            "schedule_name": "fake_schedule.000",
+            "cycler_make": "BattGenie"
+        },
+        "cycler": {
+            "sn": "0001"
+        },
+        "cycler_meta": {
+            "manufacturer": "BattGenie",
+            "model": "Cycler9000"
+        }
+    }
+}
