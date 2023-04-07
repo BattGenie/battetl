@@ -11,20 +11,10 @@ from battetl.utils import DashOrderedDict
 
 
 class Extractor:
-    def __init__(
-            self,
-            env_path: str = os.path.join(os.getcwd(), '.env')):
+    def __init__(self):
         """
         An interface to extract battery test data from raw data files. 
-
-        Parameters
-        ----------
-        env_path : str, optional
-            Path to the .env file containing the environment variables. The default is the current working
-            directory.
         """
-        Utils.load_env(env_path)
-
         self.raw_test_data_meta_data = []
         self.raw_cycle_stats_meta_data = []
         self.raw_test_data = pd.DataFrame()
