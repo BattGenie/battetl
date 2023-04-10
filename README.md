@@ -77,9 +77,9 @@ It is also necessary to include an [.env file](#env-file) within the working dir
 
 Finally, the data must be exported from the cycler in a [specific format](#data-export-requirements)
 
-Note that repeated calls to load test data that already exists in the database (as determined by unix timestamp) will not overwrite any existing data. Only test data after the lastest existing unix timestamp will be loaded. In the case of loading cycle statistics, any duplicate cycles that already exist in the database will be overwritten.
-
 For a practical implementation of `BattETL`, please refer to the example notebook `examples/battetl_demo.ipynb` located in the `examples` directory. This notebook demonstrates how to implement `BattETL` and can serve as a useful reference for your own project.
+
+> Note that repeated calls to load test data that already exists in the database (as determined by unix timestamp) will not overwrite any existing data. Only test data after the most recent existing unix timestamp will be loaded. In the case of loading cycle statistics, any duplicate cycles that already exist in the database will be overwritten.
 
 ## Config File
 
