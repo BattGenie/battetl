@@ -79,7 +79,7 @@ Finally, the data must be exported from the cycler in a [specific format](#data-
 
 Note that repeated calls to load test data that already exists in the database (as determined by unix timestamp) will not overwrite any existing data. Only test data after the lastest existing unix timestamp will be loaded. In the case of loading cycle statistics, any duplicate cycles that already exist in the database will be overwritten.
 
-For a practical implementation of `BattETL`, please refer to the example notebook `battetl_demo.ipynb` located in the `examples` directory. This notebook demonstrates how to implement `BattETL` and can serve as a useful reference for your own project.
+For a practical implementation of `BattETL`, please refer to the example notebook `examples/battetl_demo.ipynb` located in the `examples` directory. This notebook demonstrates how to implement `BattETL` and can serve as a useful reference for your own project.
 
 ## Config File
 
@@ -204,7 +204,7 @@ After running BattETL on a specific configuration file the following objects wil
 
 The Extractor is an interface that allows you to extract battery test data from raw data files. You can extract test data and cycle stats data from multiple files using `data_from_files`, and extract Arbin schedules or Maccor procedures and associated files using `schedule_from_files`.
 
-For an example of the Extractor as a standalone class, see `./examples/submodule_demos/Extractor_demo.ipynb`
+For an example of the Extractor as a standalone class, see `examples/submodule_demos/Extractor_demo.ipynb`
 
 ### Functions
 
@@ -226,7 +226,7 @@ For an example of the Extractor as a standalone class, see `./examples/submodule
 
 The Transformer is an interface that allows you to transform battery test data to the BattETL schema. By default, the time zone is set to 'America/Los_Angeles', but you can modify it to your preferred time zone using the names found in the [IANA Time Zone Database](https://www.iana.org/time-zones). In addition to the default functions provided by the Transformer, you can add your own custom functions to perform specific transformations on your data.
 
-For an example of the Extractor as a standalone class, see `./examples/submodule_demos/Transformer_demo.ipynb`
+For an example of the Extractor as a standalone class, see `examples/submodule_demos/Transformer_demo.ipynb`
 
 ### Functions
 
@@ -247,7 +247,7 @@ The `load` module provides an interface to load the extracted data into a databa
 
 Note that repeated calls to load test data that already exists in the database (as determined by unix timestamp) will not overwrite any existing data. Only test data after the lastest existing unix timestamp will be loaded. In the case of loading cycle statistics, any duplicate cycles that already exist in the database will be overwritten.
 
-For an example of the Extractor as a standalone class, see `./examples/submodule_demos/Loader_demo.ipynb`
+For an example of the Extractor as a standalone class, see `examples/submodule_demos/Loader_demo.ipynb`
 
 ### Functions
 
