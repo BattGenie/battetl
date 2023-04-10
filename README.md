@@ -4,6 +4,10 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
 
 <img src="./images/BattETL_Simple_System.svg">
 
+- [Installation & setup video](https://www.youtube.com/watch?v=tmudLhrj9xE)
+- [Design overview video](https://www.youtube.com/watch?v=Y2tXInbkYF8)
+- [Demonstration video](https://www.youtube.com/watch?v=3wNd3fhqBwo)
+
 ### Overview
 
 - [Motivation](#motivation)
@@ -46,6 +50,8 @@ As part of the transformation step BattETL calculates various cycle statistics (
 
 # Installation
 
+A video showing how to setup and install BattETL and BattDB can be found [here](https://www.youtube.com/watch?v=tmudLhrj9xE)
+
 ## Requirements
 
 BattETL requires Python 3.9 or 3.10. The specific package requirements are detailed in the `requirements.txt` file.
@@ -62,6 +68,8 @@ pip install .
 Note that if you wish to use the Load feature of BattETL it is necessary to deploy an instance of a [BattDB](https://github.com/BattGenie/battdb)] database to load the data to. Follow the instructions there for deploying the database.
 
 # Usage
+
+A video demonstrating how to use BattETL and BattDB can be found [here](https://www.youtube.com/watch?v=3wNd3fhqBwo)
 
 Using BattETL as an all-in-one ETL function is as easy as:
 
@@ -179,6 +187,8 @@ Within the Arbin Export tool the "File Type" should be set to "To CSV". Within "
 An example notebook `battetl_demo.ipynb` that provides a tool to help generate config files is located in the `examples` directory. 
 
 # BattETL Overview
+
+A video discussing the design of BattDB and BattETL can be found [here](https://www.youtube.com/watch?v=Y2tXInbkYF8)
 
 BattETL bundles together the three independent submodules:
 
