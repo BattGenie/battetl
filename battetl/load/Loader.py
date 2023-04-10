@@ -164,7 +164,7 @@ class Loader:
     def load_cycle_stats(self, df: pd.DataFrame) -> int:
         """
         Loads cycle stats to the target database. Any cycles that already exist in the 
-        data base that overlap with the new cycle data will be overwritten. 
+        database that overlap with the new cycle data will be overwritten. 
 
         Parameters
         ----------
