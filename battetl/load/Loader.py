@@ -163,8 +163,8 @@ class Loader:
 
     def load_cycle_stats(self, df: pd.DataFrame) -> int:
         """
-        Loads cycle stats to the target database. Only loads data past the
-        latest cycle that already exists in the `test_data_cycle_stats` table.
+        Loads cycle stats to the target database. Any cycles that already exist in the 
+        database that overlap with the new cycle data will be overwritten. 
 
         Parameters
         ----------
