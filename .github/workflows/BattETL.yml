@@ -70,7 +70,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: db_test
+          POSTGRES_DATABASE: db_test
           POSTGRES_PORT: 5432
         run: |
           docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run flyway
