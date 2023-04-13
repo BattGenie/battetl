@@ -14,18 +14,12 @@ jobs:
     runs-on: ubuntu-22.04
     environment: Actions
     env:
-      # BattETL tests
       DB_TARGET: db_test
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_HOSTNAME: localhost
       DB_PORT: 5432
       ENV: dev
-      # Docker
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: db_test
-      POSTGRES_PORT: 5432
     strategy:
       fail-fast: false
       matrix:
@@ -61,7 +55,7 @@ jobs:
         with:
           repository: BattGenie/battdb
           ssh-key: ${{ secrets.battdb_deploy_key }}
-          path: "battdb"
+          path: "../battdb"
 
       # - name: Start battdb database
       #   env:
@@ -73,8 +67,13 @@ jobs:
       #     docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run -d postgres
 
       - name: Run Flyway migrate
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: db_test
+          POSTGRES_PORT: 5432
         run: |
-          docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run flyway
+          docker-compose -f ../battdb/assets/battdb_docker/docker-compose.yml run flyway
 
       - name: Create env file
         run: |
