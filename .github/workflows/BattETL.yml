@@ -55,7 +55,7 @@ jobs:
         with:
           repository: BattGenie/battdb
           ssh-key: ${{ secrets.battdb_deploy_key }}
-          path: "../battdb"
+          path: "battdb"
 
       # - name: Start battdb database
       #   env:
@@ -73,7 +73,7 @@ jobs:
           POSTGRES_DB: db_test
           POSTGRES_PORT: 5432
         run: |
-          docker-compose -f ../battdb/assets/battdb_docker/docker-compose.yml run flyway
+          docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run flyway
 
       - name: Create env file
         run: |
@@ -84,7 +84,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          coverage run -m pytest -vv
+          coverage run -m pytest --ignore=battdb -vv
           coverage json
           export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
           echo "total=$TOTAL" >> $GITHUB_ENV
