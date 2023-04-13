@@ -63,14 +63,14 @@ jobs:
           ssh-key: ${{ secrets.battdb_deploy_key }}
           path: "battdb"
 
-      - name: Start battdb database
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: db_test
-          POSTGRES_PORT: 5432
-        run: |
-          docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run postgres -d
+      # - name: Start battdb database
+      #   env:
+      #     POSTGRES_USER: postgres
+      #     POSTGRES_PASSWORD: postgres
+      #     POSTGRES_DB: db_test
+      #     POSTGRES_PORT: 5432
+      #   run: |
+      #     docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run -d postgres
 
       - name: Run Flyway migrate
         run: |
