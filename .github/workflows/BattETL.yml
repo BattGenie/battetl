@@ -25,16 +25,6 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
 
-    services:
-      postgres:
-        image: postgres:15
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: db_test
-
     steps:
       - uses: actions/checkout@v3
 
@@ -65,32 +55,29 @@ jobs:
         with:
           repository: BattGenie/battdb
           ssh-key: ${{ secrets.battdb_deploy_key }}
-          path: "sqls"
+          path: "battdb"
 
-      - name: Install Flyway
+      # In Docker Compose, Flyway depends on Postgres. Therefore, by running the command in this way,
+      # Postgres can be started in the background and Flyway can be executed in the foreground
+      - name: Init test db and run flyway migrate
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DATABASE: db_test
+          POSTGRES_PORT: 5432
         run: |
-          curl -s https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.15.2/flyway-commandline-9.15.2-linux-x64.tar.gz | tar -xvz
-          sudo ln -s `pwd`/flyway-9.15.2/flyway /usr/local/bin
+          docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run flyway
 
-      - name: Run Flyway migrate
-        run: |
-          flyway migrate -url=jdbc:postgresql://localhost:5432/db_test -user=postgres -password=postgres -locations=sqls/assets/migration_scripts
-
-      - name: Create env file
-        run: |
-          # other env vars set in repo settings
-          touch .env
-          echo ENV=dev >> .env
-          cat .env
-
+      # Exclude the 'battdb' folder as it generates the 'data' folder for Docker,
+      # which may cause permission issues when trying to read it in pytest.
       - name: Test with pytest
         run: |
-          coverage run -m pytest -vv
+          coverage run -m pytest --ignore=battdb -vv
           coverage json
           export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
           echo "total=$TOTAL" >> $GITHUB_ENV
           echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
-        
+
       - name: Make badge
         uses: schneegans/dynamic-badges-action@v1.4.0
         with:
