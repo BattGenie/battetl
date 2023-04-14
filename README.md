@@ -63,13 +63,13 @@ BattETL requires Python 3.9 or 3.10. The specific package requirements are detai
 
 ### Installation Instructions
 
-Install BattETL using pip:
+- Install BattETL using pip:
 
 ```sh
 pip install battetl
 ```
 
-Install BattETL from source code:
+- Install BattETL from source code:
 
 ```sh
 git clone https://github.com/BattGenie/battetl.git
@@ -78,7 +78,7 @@ pip install -r requirements.txt
 pip install .
 ```
 
-Note that if you wish to use the Load feature of BattETL it is necessary to deploy an instance of a [BattDB](https://github.com/BattGenie/battdb) database to load the data to. Follow the instructions there for deploying the database.
+> Note that if you wish to use the Load feature of BattETL it is necessary to deploy an instance of a [BattDB](https://github.com/BattGenie/battdb) database to load the data to. Follow the instructions there for deploying the database.
 
 ## Usage
 
