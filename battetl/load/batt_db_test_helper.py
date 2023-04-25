@@ -1,4 +1,3 @@
-import battetl.load
 import psycopg2.sql
 import pandas as pd
 import random
@@ -6,8 +5,10 @@ import string
 from psycopg2 import sql
 from copy import deepcopy
 
+from .Loader import Loader
 
-class LoaderTestHelper(battetl.load.Loader):
+
+class BattDbTestHelper(Loader):
 
     cell_type_id = None
     cell_id = None
@@ -18,7 +19,7 @@ class LoaderTestHelper(battetl.load.Loader):
 
     def __init__(self, config: dict):
         '''
-        Various methods for helping loader tests.
+        Various methods to help with tests involving BattDB
         '''
         super().__init__(config)
         self.config = config['meta_data']

@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 
 from battetl import BattETL
-from loader_test_helper import LoaderTestHelper
+from battetl.load import BattDbTestHelper
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), 'configs')
 
@@ -19,12 +19,12 @@ class Values:
         The BattETL object that is used in the tests
     CONFIG_1 : dict
         The configuration dictionary for the test
-    TEST_HELPER : LoaderTestHelper
-        The LoaderTestHelper object that is used in the tests
+    TEST_HELPER : BattDbTestHelper
+        The BattDbTestHelper object that is used in the tests
     """
     cell: BattETL = None
     CONFIG_1: dict = None
-    TEST_HELPER: LoaderTestHelper = None
+    TEST_HELPER: BattDbTestHelper = None
 
 
 @pytest.fixture(scope='module', autouse=True)
@@ -36,7 +36,7 @@ def add_database_test_entries():
     with open(os.path.join(CONFIG_DIR, 'config_1.json')) as config_file:
         Values.CONFIG_1 = json.load(config_file)
 
-    Values.TEST_HELPER = LoaderTestHelper(Values.CONFIG_1)
+    Values.TEST_HELPER = BattDbTestHelper(Values.CONFIG_1)
 
     # Will be executed before the first test
     Values.TEST_HELPER.create_test_db_entries()
