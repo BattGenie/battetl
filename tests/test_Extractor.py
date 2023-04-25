@@ -11,6 +11,7 @@ MACCOR_PATH = os.path.join(BASE_DATA_PATH, 'maccor_cycler_data')
 MACCOR_SIMPLE_PATH = os.path.join(MACCOR_PATH, 'simple_data')
 MACCOR_FRA_PATH = os.path.join(MACCOR_PATH, 'fra_data')
 MACCOR_FASTWAVE_PATH = os.path.join(MACCOR_PATH, 'fastwave_data')
+MACCOR_TYPE2_PATH = os.path.join(MACCOR_PATH, 'type2_data')
 ARBIN_PATH = os.path.join(BASE_DATA_PATH, 'arbin_cycler_data')
 ARBIN_SINGLE_PATH = os.path.join(ARBIN_PATH, 'single_data_file')
 ARBIN_MULTIPLE_PATH = os.path.join(ARBIN_PATH, 'multiple_data_files')
@@ -40,7 +41,34 @@ def test_extract_maccor_test_data():
     extractor.data_from_files([path])
     df_extracted = extractor.raw_test_data
 
-    df_loaded = pd.read_csv(path, sep='\t', header=2)
+    df_loaded = pd.read_csv(
+        path,
+        sep='\t',
+        header=2,
+        skipinitialspace=True,
+        index_col=False
+    )
+
+    assert (df_extracted.equals(df_loaded))
+    assert (extractor.cycler_make == 'maccor')
+
+
+@pytest.mark.extract
+@pytest.mark.maccor
+def test_extract_maccor_test_data_type2():
+    path = join(MACCOR_TYPE2_PATH, 'BG_Maccor_Type2 - 075.txt')
+
+    extractor = Extractor()
+    extractor.data_from_files([path])
+    df_extracted = extractor.raw_test_data
+
+    df_loaded = pd.read_csv(
+        path,
+        sep='\t',
+        header=3,
+        skipinitialspace=True,
+        index_col=False
+    )
 
     assert (df_extracted.equals(df_loaded))
     assert (extractor.cycler_make == 'maccor')
@@ -74,7 +102,12 @@ def test_extract_maccor_stats_data_pickle():
     extractor = Extractor()
     df_extracted = extractor.from_pickle(path_pkl)
 
-    df_loaded = pd.read_csv(path_txt, sep='\t', header=2)
+    df_loaded = pd.read_csv(
+        path_txt,
+        sep='\t',
+        header=2,
+        skipinitialspace=True,
+        index_col=False)
 
     assert (df_extracted.equals(df_loaded))
 

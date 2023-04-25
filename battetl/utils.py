@@ -138,6 +138,8 @@ class Utils:
             Constants.COLUMNS_ARBIN_CYCLE_STATS_ONLY)
         maccorTestDataSet = Utils.get_lower_strip_set(
             Constants.COLUMNS_MACCOR_TEST_DATA_ONLY)
+        maccorTestDataSetType2 = Utils.get_lower_strip_set(
+            Constants.COLUMNS_MACCOR_TEST_DATA_TYPE2_ONLY)
         maccorCycleStatsSet = Utils.get_lower_strip_set(
             Constants.COLUMNS_MACCOR_CYCLE_STATS_ONLY)
 
@@ -148,6 +150,9 @@ class Utils:
             return Constants.MAKE_ARBIN, Constants.DATA_TYPE_CYCLE_STATS
 
         if len(columnsSet & maccorTestDataSet) >= (len(maccorTestDataSet) / 2):
+            return Constants.MAKE_MACCOR, Constants.DATA_TYPE_TEST_DATA
+
+        if len(columnsSet & maccorTestDataSetType2) >= (len(maccorTestDataSetType2) / 2):
             return Constants.MAKE_MACCOR, Constants.DATA_TYPE_TEST_DATA
 
         if len(columnsSet & maccorCycleStatsSet) >= (len(maccorCycleStatsSet) / 2):
@@ -286,10 +291,7 @@ class Utils:
         if column not in df.columns:
             raise NameError(f'Can not find {column}')
 
-        def conv(row):
-            return pd.Timedelta(row[column]).total_seconds()
-
-        df[column] = df.apply(conv, axis=1)
+        df[column] = round(pd.to_timedelta(df[column]).dt.total_seconds(), 3)
 
         return df
 

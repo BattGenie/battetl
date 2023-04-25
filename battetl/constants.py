@@ -88,6 +88,18 @@ class Constants:
         'TestTime(s)',
         'Temp 1',
     }
+
+    COLUMNS_MACCOR_TEST_DATA_TYPE2_ONLY = {
+        'Rec',
+        'Cycle P',
+        'Cycle C',
+        'Capacity',
+        'Energy',
+        'MD',
+        'ES',
+        'DPT Time',
+    }
+
     COLUMNS_MACCOR_CYCLE_STATS_ONLY = {
         'T1_End',
         'T1_Max',
@@ -103,6 +115,8 @@ class Constants:
         # Test Data
         'voltage_v': 'voltage_mv',
         'current_a': 'current_ma',
+        'voltage': 'voltage_mv',
+        'current': 'current_ma',
         'charge_capacity_ah': 'charge_capacity_mah',
         'discharge_capacity_ah': 'discharge_capacity_mah',
         'charge_energy_wh': 'charge_energy_mwh',
@@ -188,9 +202,12 @@ class Constants:
     }
     COLUMNS_MAPPING_MACCOR_TEST_DATA = {
         'Cyc#': 'cycle',
+        'Cycle P': 'cycle',
         'Step': 'step',
         'TestTime(s)': 'test_time_s',
+        'Test Time': 'test_time_s',
         'StepTime(s)': 'step_time_s',
+        'Step Time': 'step_time_s',
         'Capacity(Ah)': 'maccor_capacity_ah',
         'Watt-hr': 'maccor_energy_wh',
         'Current(A)': 'current_a',

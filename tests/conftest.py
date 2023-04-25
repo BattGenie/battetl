@@ -79,6 +79,23 @@ def data_column():
                 'unixtime_s',
             ]
 
+            test_data_type2 = [
+                'rec',
+                'cycle',
+                'cycle c',
+                'step',
+                'test_time_s',
+                'step_time_s',
+                'capacity',
+                'energy',
+                'current_ma',
+                'voltage_mv',
+                'md',
+                'es',
+                'recorded_datetime',
+                'unixtime_s',
+            ]
+
             cycle_stats = [
                 'cycle',
                 'cycle type',
@@ -174,6 +191,23 @@ def data_row():
                 'dcir': 0.0,
                 'thermocouple_1_c': 26.55,
                 'unixtime_s': 1585288814,
+            }]).iloc[0]
+
+            test_data_type2 = pd.DataFrame([{
+                'rec': '1',
+                'cycle': 0,
+                'cycle c': 1,
+                'step': 1,
+                'test_time_s': 0.0,
+                'step_time_s': 0.0,
+                'capacity': 0.0,
+                'energy': 0.0,
+                'current_ma': 0.0,
+                'voltage_mv': 3887.0,
+                'md': 'R',
+                'es': 0,
+                'recorded_datetime': pd.Timestamp('2023-03-25 18:03:38+00:00', tz='America/Los_Angeles').tz_convert('UTC'),
+                'unixtime_s': 1679767418,
             }]).iloc[0]
 
             cycle_stats = pd.DataFrame([{

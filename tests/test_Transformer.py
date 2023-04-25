@@ -1,7 +1,5 @@
 import os
 import pytest
-import numpy as np
-import pandas as pd
 from os.path import join
 
 from battetl.extract import Extractor
@@ -10,6 +8,7 @@ from battetl.transform import Transformer
 BASE_DATA_PATH = os.path.join(os.path.dirname(__file__), 'data')
 MACCOR_PATH = os.path.join(BASE_DATA_PATH, 'maccor_cycler_data')
 MACCOR_SIMPLE_PATH = os.path.join(MACCOR_PATH, 'simple_data')
+MACCOR_TYPE2_PATH = os.path.join(MACCOR_PATH, 'type2_data')
 ARBIN_PATH = os.path.join(BASE_DATA_PATH, 'arbin_cycler_data')
 ARBIN_SINGLE_PATH = os.path.join(ARBIN_PATH, 'single_data_file')
 ARBIN_MULTIPLE_PATH = os.path.join(ARBIN_PATH, 'multiple_data_files')
@@ -34,6 +33,27 @@ def test_transform_maccor_test_data(data_column, data_row):
     # First row of transformed data
     row = df_transformed.iloc[0]
     assert row.equals(data_row.maccor.test_data)
+
+
+@pytest.mark.transform
+@pytest.mark.maccor
+def test_transform_maccor_test_data_type2(data_column, data_row):
+    path = join(MACCOR_TYPE2_PATH, 'BG_Maccor_Type2 - 075.pkl')
+    extractor = Extractor()
+    df_extracted = extractor.from_pickle(path)
+
+    transformer = Transformer()
+    transformer.transform_test_data(df_extracted)
+    df_transformed = transformer.test_data
+
+    # Maccor test data columns
+    assert all(
+        [col in df_transformed.columns for col in data_column.maccor.test_data_type2]
+    )
+
+    # First row of transformed data
+    row = df_transformed.iloc[0]
+    assert row.equals(data_row.maccor.test_data_type2)
 
 
 @pytest.mark.transform
