@@ -132,6 +132,8 @@ class Constants:
         # Maccor Test Data
         'maccor_capacity_ah': 'maccor_capacity_mah',
         'maccor_energy_wh': 'maccor_energy_mwh',
+        'capacity': 'maccor_capacity_mah',
+        'energy': 'maccor_energy_mwh',
         # Arbin Cycle Stats
         'reported_charge_capacity_ah': 'reported_charge_capacity_mah',
         'reported_discharge_capacity_ah': 'reported_discharge_capacity_mah',
