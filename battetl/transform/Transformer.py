@@ -194,6 +194,11 @@ class Transformer:
         df = self.__convert_datetime_unixtime(df)
         df = self.__convert_data_type(df)
 
+        if 'test_time_s' in df.columns and len(df) > 0 and self.__timedelta_validation_check(df['test_time_s'][0]):
+            df = Utils.convert_timedelta_to_seconds(df, 'test_time_s')
+        if 'step_time_s' in df.columns and len(df) > 0 and self.__timedelta_validation_check(df['step_time_s'][0]):
+            df = Utils.convert_timedelta_to_seconds(df, 'step_time_s')
+
         df = Utils.sort_dataframe(df, ['unixtime_s', 'step'])
 
         return df
@@ -222,18 +227,18 @@ class Transformer:
         df = Utils.convert_to_milli(df)
         df = self.__convert_data_type(df)
 
-        def timedelta_validation_check(input_string):
-            # Check if it is like the format "1d 15:07:52.77"
-            regex = re.compile('\d+d \d+:\d+:\d+.\d+\Z', re.I)
-            match = regex.match(str(input_string))
-            return bool(match)
-
-        if 'test_time_s' in df.columns and len(df) > 0 and timedelta_validation_check(df['test_time_s'][0]):
+        if 'test_time_s' in df.columns and len(df) > 0 and self.__timedelta_validation_check(df['test_time_s'][0]):
             df = Utils.convert_timedelta_to_seconds(df, 'test_time_s')
 
         df = Utils.sort_dataframe(df, ['cycle'])
 
         return df
+
+    def __timedelta_validation_check(self, input_string):
+        # Check if it is like the format "1d 15:07:52.77" or "1d 15:07:52"
+        regex = re.compile(r'\d+d \d+:\d+:\d+(\.\d+)?\Z', re.I)
+        match = regex.match(str(input_string))
+        return bool(match)
 
     def __convert_datetime_unixtime(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -386,8 +391,8 @@ class Transformer:
 
             # Calculate coulombic efficiency from the charge and discharge stats.
             if (('calculated_charge_capacity_mah' not in stats) or
-                    ('calculated_discharge_capacity_mah' not in stats) or 
-                        (stats['calculated_charge_capacity_mah']==0)):
+                    ('calculated_discharge_capacity_mah' not in stats) or
+                    (stats['calculated_charge_capacity_mah'] == 0)):
                 ce = float("nan")
                 logger.info(
                     "Unable to calculate coulombic efficiency for cycle " + str(cycle))
@@ -467,15 +472,15 @@ class Transformer:
         fifty_percent_cap_mah = stats['calculated_charge_capacity_mah'] * 0.5
         try:
             eighty_percent_cap_time_s = (chg_data[chg_data.charge_capacity_mah > eighty_percent_cap_mah].test_time_s.iloc[0]
-                                        - chg_data.test_time_s.iloc[0])
+                                         - chg_data.test_time_s.iloc[0])
             half_percent_cap_time_s = (chg_data[chg_data.charge_capacity_mah > fifty_percent_cap_mah].test_time_s.iloc[0]
-                                    - chg_data.test_time_s.iloc[0])
+                                       - chg_data.test_time_s.iloc[0])
         except:
             eighty_percent_cap_time_s = float('nan')
             half_percent_cap_time_s = float('nan')
             logger.warning(
                 f'Incomplete charge data for cycle {cycle_data.cycle.iloc[0]}')
-            
+
         stats['calculated_fifty_percent_charge_time_s'] = half_percent_cap_time_s
         stats['calculated_eighty_percent_charge_time_s'] = eighty_percent_cap_time_s
 
