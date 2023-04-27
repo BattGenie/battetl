@@ -61,7 +61,18 @@ A video showing how to setup and install BattETL and BattDB can be found [here](
 
 ### Requirements
 
-BattETL requires Python 3.9 or 3.10. The specific package requirements are detailed in the `requirements.txt` file.
+Based on processing approximately 1,500,000 rows and 12 columns with Pandas, BattETL requires a minimum of 600MB of RAM.
+
+#### Software Requirements
+
+- Python 3.9 or 3.10
+- The required packages are listed in the `requirements.txt` file
+
+#### Hardware Requirements
+
+- CPU: 2 GHz or higher
+- RAM: 4GB or higher
+- Disk Space: At least 1.6 GB of free space is recommended to accommodate the 600MB of required RAM, as well as additional space for installation and storing data. The exact amount of disk space required will depend on the size of the data being processed and the resulting intermediate results.
 
 ### Installation Instructions
 
