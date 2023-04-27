@@ -72,7 +72,7 @@ Based on processing approximately 1,500,000 rows and 12 columns with Pandas, Bat
 
 - CPU: 2 GHz or higher
 - RAM: 4GB or higher
-- Disk Space: At least 1.6 GB of free space is recommended to accommodate the 600MB of required RAM, as well as additional space for installation and storing data. The exact amount of disk space required will depend on the size of the data being processed and the resulting intermediate results.
+- Disk Space: At least 3.2 GB of free space is recommended to accommodate the 1.2 GB of required RAM (600MB for the original data and 600MB for the transformed data), as well as additional space for installation and storing data. The exact amount of disk space required will depend on the size of the data being processed and the resulting intermediate results.
 
 ### Installation Instructions
 
