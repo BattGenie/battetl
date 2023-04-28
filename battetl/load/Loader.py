@@ -1,3 +1,4 @@
+from battetl import logger, Constants, Utils
 import os
 import copy
 import json
@@ -14,8 +15,6 @@ from schema import Schema, Use, Optional, SchemaError
 from tqdm import tqdm
 # register the pandas extension
 tqdm.pandas()
-
-from battetl import logger, Constants, Utils
 
 
 class Loader:
@@ -138,28 +137,33 @@ class Loader:
             The number of rows inserted into the `data` table.
         """
 
+        num_rows_loaded = 0
+
         df_copy = df.copy(deep=True)
-
-        # Move fields to other_detail
-        df_copy = self.__create_other_detail(
-            df_copy, Constants.COLUMNS_TEST_DATA)
-
-        for column in df_copy.columns:
-            if column not in Constants.COLUMNS_TEST_DATA:
-                logger.debug(f'Dropping column {column} from DataFrame')
-                df_copy = df_copy.drop([column], axis=1)
-
-        test_id = self.__lookup_test_id()
-        if not test_id:
-            test_id = self.__insert_test_meta()
-        df_copy['test_id'] = np.ones(
-            df_copy.shape[0], dtype=np.uint16) * test_id
 
         latest_unixtime_s = self.__lookup_latest_unixtime()
         if latest_unixtime_s:
             df_copy = df_copy[df_copy['unixtime_s'] > latest_unixtime_s]
 
-        return self.__load_dataframe(df=df_copy, target_table='test_data')
+        if df_copy.shape[0] > 0:
+            # Move fields to other_detail
+            df_copy = self.__create_other_detail(
+                df_copy, Constants.COLUMNS_TEST_DATA)
+
+            for column in df_copy.columns:
+                if column not in Constants.COLUMNS_TEST_DATA:
+                    logger.debug(f'Dropping column {column} from DataFrame')
+                    df_copy = df_copy.drop([column], axis=1)
+
+            test_id = self.__lookup_test_id()
+            if not test_id:
+                test_id = self.__insert_test_meta()
+            df_copy['test_id'] = np.ones(
+                df_copy.shape[0], dtype=np.uint16) * test_id
+            
+            num_rows_loaded = self.__load_dataframe(df=df_copy, target_table='test_data')
+
+        return num_rows_loaded
 
     def load_cycle_stats(self, df: pd.DataFrame) -> int:
         """
@@ -210,7 +214,8 @@ class Loader:
                 ORDER BY cycle_stats_id ASC
             """).format(
                 test_id=psycopg2.sql.Literal(str(test_id)),
-                newest_cycle=psycopg2.sql.Literal(str(int(df_copy.cycle.iloc[0])))
+                newest_cycle=psycopg2.sql.Literal(
+                    str(int(df_copy.cycle.iloc[0])))
             )
             cursor.execute(stmt)
             result = cursor.fetchall()
@@ -747,7 +752,8 @@ class Loader:
 
         # Remove any empty entries from upload dict
         dict_to_load = {k: v for k, v in dict_to_load.items() if v}
-        logger.debug(f'Inserting into {target_table} with {json.dumps(dict_to_load)}')
+        logger.debug(
+            f'Inserting into {target_table} with {json.dumps(dict_to_load)}')
         pk_id = None
 
         try:
@@ -775,7 +781,8 @@ class Loader:
                 f'Error inserting into {target_table} with pk_id_col={pk_id_col}')
             logger.error(e)
         except Exception as e:
-            logger.error(f'Unexpected error inserting into {target_table} with pk_id_col={pk_id_col}')
+            logger.error(
+                f'Unexpected error inserting into {target_table} with pk_id_col={pk_id_col}')
             logger.error(e)
 
         return pk_id
