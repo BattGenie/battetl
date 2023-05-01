@@ -281,7 +281,7 @@ def test_load_test_data_small_dataset():
 
     # Pull loaded data and confirm it matches what we loaded.
     df_sql = pd.read_sql('SELECT * FROM test_data WHERE test_id = ' +
-                         str(Values.TEST_HELPER.test_id)+';', Values.TEST_HELPER.engine)
+                         str(Values.TEST_HELPER.test_id) + ' ORDER BY unixtime_s;', Values.TEST_HELPER.engine)
     sql_dict = df_sql.to_dict(orient='list')
     # Convert the other_detail column to a list of dicts.
     pd_other_detail = [json.loads(row) for row in [
