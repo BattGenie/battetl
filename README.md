@@ -61,7 +61,7 @@ A video showing how to setup and install BattETL and BattDB can be found [here](
 
 ### Requirements
 
-Based on processing approximately 1,500,000 rows and 12 columns with Pandas, BattETL requires a minimum of 600MB of RAM.
+
 
 #### Software Requirements
 
@@ -70,9 +70,10 @@ Based on processing approximately 1,500,000 rows and 12 columns with Pandas, Bat
 
 #### Hardware Requirements
 
-- CPU: 2 GHz or higher
-- RAM: 4GB or higher
-- Disk Space: At least 3.2 GB of free space is recommended to accommodate the 1.2 GB of required RAM (600MB for the original data and 600MB for the transformed data), as well as additional space for installation and storing data. The exact amount of disk space required will depend on the size of the data being processed and the resulting intermediate results.
+Based on processing approximately 10,000 rows and 12 columns with Pandas, BattETL requires a minimum of 13MB of RAM.
+
+- RAM: 2 GB or higher.
+- Disk Space: At least 2 GB of free space is recommended to accommodate the transformed data, as well as additional space for installation and storing data. The exact amount of disk space required will depend on the size of the data being processed and the resulting intermediate results.
 
 ### Installation Instructions
 
