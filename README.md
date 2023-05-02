@@ -61,8 +61,6 @@ A video showing how to setup and install BattETL and BattDB can be found [here](
 
 ### Requirements
 
-
-
 #### Software Requirements
 
 - Python 3.9 or 3.10
