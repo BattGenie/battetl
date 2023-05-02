@@ -172,29 +172,15 @@ class BattDbTestHelper(Loader):
 
     def delete_test_data(self):
         '''
-        Deletes all data from the test_data and test_data_cycle_stats tables for test specified in config. 
+        Deletes all data from from data tables
         '''
-        with self.conn.cursor() as cursor:
-            stmt = sql.SQL("""
-                DELETE FROM 
-                    test_data
-                WHERE 
-                    test_id = {test_id}
-            """).format(
-                test_id=sql.Literal(self.test_id)
-            )
-            cursor.execute(stmt)
-
-        with self.conn.cursor() as cursor:
-            stmt = sql.SQL("""
-                DELETE FROM 
-                    test_data_cycle_stats
-                WHERE 
-                    test_id = {test_id}
-            """).format(
-                test_id=sql.Literal(self.test_id)
-            )
-            cursor.execute(stmt)
+        data_to_delete_info = [
+            ('test_data','test_id',self.test_id),
+            ('test_data_cycle_stats','test_id',self.test_id),
+            ('sil_data','sil_id',self.sil_id),
+        ]
+        for data_info in data_to_delete_info:
+            self.delete_entry(data_info[0],data_info[1],data_info[2])
 
     def generate_random_string(self, len=20) -> str:
         '''
