@@ -384,8 +384,6 @@ class Loader:
 
         return df
 
-    # TODO: Modify query so that test_name is used in conjunction with start_date
-
     def __lookup_test_id(self) -> int:
         """
         Looks up the test_id in the target database based on the test_name defined
