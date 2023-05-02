@@ -1,4 +1,3 @@
-import psycopg2.sql
 import pandas as pd
 import random
 import string
