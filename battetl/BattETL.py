@@ -138,11 +138,11 @@ class BattETL:
         else:
             logger.warning('No cycle stats to transform.')
 
-        if self.schedule and 'cv_voltage_thresh_mv' in self.config:
+        if self.schedule and 'cv_voltage_threshold_mv' in self.config['meta_data']['schedule_meta']:
             try:
                 transformer.calc_cycle_stats(
                     self.schedule['steps'],
-                    self.config['cv_voltage_thresh_mv'])
+                    self.config['meta_data']['schedule_meta']['cv_voltage_threshold_mv'])
                 self.cycle_stats = transformer.cycle_stats
             except Exception as e:
                 logger.error('Failed to calculate cycle stats', exc_info=True)
