@@ -1,4 +1,3 @@
-import psycopg2.sql
 import pandas as pd
 import random
 import string
@@ -32,27 +31,27 @@ class BattDbTestHelper(Loader):
         likely there is data in the database thats needs to be cleared. Easiest course 
         of action in that case is rebuilding the database from scratch. 
         '''
-        self.cell_type_id = self.perform_insert(
+        self.cell_type_id = self._Loader__perform_insert(
             target_table='cells_meta', dict_to_load=self.config['cell_meta'], pk_id_col='cell_type_id')
         assert (self.cell_type_id)
 
         upload_dict = {**self.config['cell'],
                        **{'cell_type_id': self.cell_type_id}}
-        self.cell_id = self.perform_insert(
+        self.cell_id = self._Loader__perform_insert(
             target_table='cells', dict_to_load=upload_dict, pk_id_col='cell_id')
         assert (self.cell_id)
 
-        self.cycler_type_id = self.perform_insert(
+        self.cycler_type_id = self._Loader__perform_insert(
             target_table='cyclers_meta', dict_to_load=self.config['cycler_meta'], pk_id_col='cycler_type_id')
         assert (self.cycler_type_id)
 
         upload_dict = {**self.config['cycler'],
                        **{'cycler_type_id': self.cycler_type_id}}
-        self.cycler_id = self.perform_insert(
+        self.cycler_id = self._Loader__perform_insert(
             target_table='cyclers', dict_to_load=upload_dict, pk_id_col='cycler_id')
         assert (self.cycler_id)
 
-        self.schedule_id = self.perform_insert(
+        self.schedule_id = self._Loader__perform_insert(
             target_table='schedule_meta', dict_to_load=self.config['schedule_meta'], pk_id_col='schedule_id')
         assert (self.schedule_id)
 
@@ -60,9 +59,16 @@ class BattDbTestHelper(Loader):
                        **{'cycler_id': self.cycler_id,
                           'schedule_id': self.schedule_id,
                           'cell_id': self.cell_id}}
-        self.test_id = self.perform_insert(
+        self.test_id = self._Loader__perform_insert(
             target_table='test_meta', dict_to_load=upload_dict, pk_id_col='test_id')
         assert (self.test_id)
+
+        upload_dict = {'test_id': self.test_id,
+                       'user_id': 'test_helper'}
+        self.sil_id = self._Loader__perform_insert(
+            target_table='sil_meta', dict_to_load=upload_dict, pk_id_col='sil_id')
+        assert (self.test_id)
+
 
     def read_last_row(self, target_table: str, pk_col_name: str) -> tuple:
         """
@@ -97,45 +103,6 @@ class BattDbTestHelper(Loader):
 
         return last_row
 
-    def perform_insert(self, target_table: str, dict_to_load: dict, pk_id_col: str) -> int:
-        """
-        Inserts the values from the dict_to_load into the `target_table`. Assumes
-        columns are keys. Drops any empty keys.
-
-        Parameters
-        ----------
-        target_table : str
-            The table to perform the insert into.
-        dict_to_load : dict
-            The dictionary containing the key value pairs to load into the target table.
-        pk_id_col : str
-            The name of the column for the primary key id.
-
-        Returns
-        -------
-        pk_id : int
-            The primary key id for the newly inserted row. Returns None if issue with inserting rows.
-        """
-
-        # Remove any empty entries from upload dict
-        {k: v for k, v in dict_to_load.items() if v}
-
-        insert_statement = psycopg2.sql.SQL(
-            "INSERT INTO {table} ({cols}) VALUES ({vals}) RETURNING {pk_id}").format(
-            table=psycopg2.sql.Identifier(target_table),
-            cols=psycopg2.sql.SQL(', ').join(
-                map(psycopg2.sql.Identifier, list(dict_to_load.keys()))),
-            vals=psycopg2.sql.SQL(', ').join(
-                psycopg2.sql.Placeholder() * len(dict_to_load)),
-            pk_id=psycopg2.sql.Identifier(pk_id_col)
-        )
-        with self.conn.cursor() as cursor:
-            cursor.execute(insert_statement, list(dict_to_load.values()))
-            result = cursor.fetchone()
-        if result:
-            pk_id = result[0]
-
-        return pk_id
 
     def load_df_to_db(self, df: pd.DataFrame, target_table: str) -> int:
         """
@@ -154,23 +121,14 @@ class BattDbTestHelper(Loader):
         num_rows_inserted : int
             The number of rows inserted into the target_table.
         """
-        __upload_chunk_size = 10000
-
-        num_rows_inserted = df.to_sql(
-            name=target_table,
-            con=self.engine,
-            schema='public',
-            if_exists='append',
-            index=False,
-            chunksize=__upload_chunk_size,
-            method='multi')
-
-        return num_rows_inserted
+        return self._Loader__load_dataframe(df, target_table)
 
     def delete_test_db_entries(self):
         '''
         Deletes the test_db entries created in `self.create_test_db_entries`
         '''
+        self.delete_entry(
+            'sil_meta', 'sil_id', self.sil_id)
         self.delete_entry(
             'test_meta', 'test_id', self.test_id)
         self.delete_entry(
@@ -183,6 +141,7 @@ class BattDbTestHelper(Loader):
             'cyclers_meta', 'cycler_type_id', self.cycler_type_id)
         self.delete_entry(
             'schedule_meta', 'schedule_id', self.schedule_id)
+
 
     def delete_entry(self, target_table, pk_col_name, pk_id):
         '''
@@ -212,29 +171,15 @@ class BattDbTestHelper(Loader):
 
     def delete_test_data(self):
         '''
-        Deletes all data from the test_data and test_data_cycle_stats tables for test specified in config. 
+        Deletes all data from from data tables
         '''
-        with self.conn.cursor() as cursor:
-            stmt = sql.SQL("""
-                DELETE FROM 
-                    test_data
-                WHERE 
-                    test_id = {test_id}
-            """).format(
-                test_id=sql.Literal(self.test_id)
-            )
-            cursor.execute(stmt)
-
-        with self.conn.cursor() as cursor:
-            stmt = sql.SQL("""
-                DELETE FROM 
-                    test_data_cycle_stats
-                WHERE 
-                    test_id = {test_id}
-            """).format(
-                test_id=sql.Literal(self.test_id)
-            )
-            cursor.execute(stmt)
+        data_to_delete_info = [
+            ('test_data','test_id',self.test_id),
+            ('test_data_cycle_stats','test_id',self.test_id),
+            ('sil_data','sil_id',self.sil_id),
+        ]
+        for data_info in data_to_delete_info:
+            self.delete_entry(data_info[0],data_info[1],data_info[2])
 
     def generate_random_string(self, len=20) -> str:
         '''
