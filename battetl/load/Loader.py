@@ -827,8 +827,9 @@ class Loader:
 
         test_id = self.__lookup_test_id()
         if not test_id:
+            test_name = self.config['test_meta']['test_name']
             logger.info(
-                f'No test data exists for {test_id}, OK to upload all data.')
+                f'No test data exists for "{test_name}", OK to upload all data.')
             return None
 
         with self.conn.cursor() as cursor:
