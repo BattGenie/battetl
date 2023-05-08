@@ -2,6 +2,7 @@ from battetl import logger, Constants, Utils
 import os
 import copy
 import json
+import time
 import psycopg2
 import psycopg2.pool
 import psycopg2.sql
@@ -121,7 +122,7 @@ class Loader:
         assert (self.__validate_config(config))
         assert (self.__create_connection())
 
-    def load_test_data(self, df: pd.DataFrame) -> int:
+    def load_test_data(self, df: pd.DataFrame, retry_cnt: int = 0) -> int:
         """
         Loads test data to the target database. Only loads data past the
         latest `unixtime_s` field that already exists in the `test_data` table.
@@ -130,38 +131,64 @@ class Loader:
         ----------
         df : pd.DataFrame
             Data Frame containing test data to load to database.
+        retry_cnt : int, optional
+            The number of times to retry loading data to the database.
 
         Returns
         -------
         num_rows_loaded : int
             The number of rows inserted into the `data` table.
         """
+        logger.info('Loading test data to database')
 
         num_rows_loaded = 0
 
         df_copy = df.copy(deep=True)
 
-        latest_unixtime_s = self.__lookup_latest_unixtime()
-        if latest_unixtime_s:
-            df_copy = df_copy[df_copy['unixtime_s'] > latest_unixtime_s]
+        try:
+            if retry_cnt > 0:
+                logger.info(f'Retry count: {retry_cnt}')
+                # Re-create connection
+                self.__create_connection()
 
-        if df_copy.shape[0] > 0:
-            # Move fields to other_detail
-            df_copy = self.__create_other_detail(
-                df_copy, Constants.COLUMNS_TEST_DATA)
+            latest_unixtime_s = self.__lookup_latest_unixtime()
+            if latest_unixtime_s:
+                df_copy = df_copy[df_copy['unixtime_s'] > latest_unixtime_s]
 
-            for column in df_copy.columns:
-                if column not in Constants.COLUMNS_TEST_DATA:
-                    logger.debug(f'Dropping column {column} from DataFrame')
-                    df_copy = df_copy.drop([column], axis=1)
+            if df_copy.shape[0] > 0:
+                # Move fields to other_detail
+                df_copy = self.__create_other_detail(
+                    df_copy, Constants.COLUMNS_TEST_DATA)
 
-            test_id = self.__lookup_test_id()
-            if not test_id:
-                test_id = self.__insert_test_meta()
-            df_copy['test_id'] = np.ones(
-                df_copy.shape[0], dtype=np.uint16) * test_id
-            
-            num_rows_loaded = self.__load_dataframe(df=df_copy, target_table='test_data')
+                for column in df_copy.columns:
+                    if column not in Constants.COLUMNS_TEST_DATA:
+                        logger.debug(
+                            f'Dropping column {column} from DataFrame')
+                        df_copy = df_copy.drop([column], axis=1)
+
+                test_id = self.__lookup_test_id()
+                if not test_id:
+                    test_id = self.__insert_test_meta()
+                df_copy['test_id'] = np.ones(
+                    df_copy.shape[0], dtype=np.uint16) * test_id
+
+                num_rows_loaded += self.__load_dataframe(
+                    df=df_copy, target_table='test_data')
+        except Exception as e:
+            logger.error('Error loading test data')
+            if retry_cnt < Constants.DATABASE_MAX_RETRIES:
+                logger.info(
+                    f'Retrying load_test_data() {retry_cnt+1}/{Constants.DATABASE_MAX_RETRIES}')
+                retry_delay = min(Constants.DATABASE_RETRY_DELAY *
+                                  (retry_cnt+1), Constants.DATABASE_MAX_RETRY_DELAY)
+                logger.info(f'Retry delay: {retry_delay} seconds')
+                time.sleep(retry_delay)
+
+                num_rows_loaded += self.load_test_data(
+                    df=df_copy, retry_cnt=retry_cnt+1)
+            else:
+                logger.error(f'Exceeded max retries for load_test_data()')
+                raise e
 
         return num_rows_loaded
 
@@ -180,6 +207,7 @@ class Loader:
         num_rows_loaded : int
             The number of rows inserted into the `test_data` table.
         """
+        logger.info('Loading cycle stats to database')
 
         df_copy = df.copy(deep=True)
 
@@ -799,8 +827,9 @@ class Loader:
 
         test_id = self.__lookup_test_id()
         if not test_id:
+            test_name = self.config['test_meta']['test_name']
             logger.info(
-                f'No test data exists for {test_id}, OK to upload all data.')
+                f'No test data exists for "{test_name}", OK to upload all data.')
             return None
 
         with self.conn.cursor() as cursor:
@@ -911,5 +940,7 @@ class Loader:
             logger.error(
                 f'Unexpected error inserting into {target_table} table.')
             logger.error(e)
+            if target_table == 'test_data':
+                raise e
 
         return num_rows_inserted
