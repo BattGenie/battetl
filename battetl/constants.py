@@ -1,9 +1,9 @@
 class Constants:
     DEFAULT_TIME_ZONE = 'America/Los_Angeles'
 
-    MAX_RETRIES = 10
-    RETRY_DELAY = 10
-    MAX_RETRY_DELAY = 60
+    DATABASE_MAX_RETRIES = 10
+    DATABASE_RETRY_DELAY = 10
+    DATABASE_MAX_RETRY_DELAY = 60
 
     MAKE_ARBIN = 'arbin'
     MAKE_MACCOR = 'maccor'

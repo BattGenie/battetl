@@ -176,11 +176,11 @@ class Loader:
                     df=df_copy, target_table='test_data')
         except Exception as e:
             logger.error('Error loading test data')
-            if retry_cnt < Constants.MAX_RETRIES:
+            if retry_cnt < Constants.DATABASE_MAX_RETRIES:
                 logger.info(
-                    f'Retrying load_test_data() {retry_cnt+1}/{Constants.MAX_RETRIES}')
-                retry_delay = min(Constants.RETRY_DELAY *
-                                  (retry_cnt+1), Constants.MAX_RETRY_DELAY)
+                    f'Retrying load_test_data() {retry_cnt+1}/{Constants.DATABASE_MAX_RETRIES}')
+                retry_delay = min(Constants.DATABASE_RETRY_DELAY *
+                                  (retry_cnt+1), Constants.DATABASE_MAX_RETRY_DELAY)
                 logger.info(f'Retry delay: {retry_delay} seconds')
                 time.sleep(retry_delay)
 
