@@ -368,7 +368,7 @@ def test_load_cycle_stats_small_dataset():
 
     # Pull loaded data and verify it matches.
     df_sql = pd.read_sql(
-        'SELECT * FROM test_data_cycle_stats WHERE test_id = '+str(Values.TEST_HELPER.test_id)+';', Values.TEST_HELPER.engine)
+        'SELECT * FROM test_data_cycle_stats WHERE test_id = '+str(Values.TEST_HELPER.test_id)+' ORDER BY cycle;', Values.TEST_HELPER.engine)
     sql_dict = df_sql.to_dict(orient='list')
     for key in data_dict.keys():
         assert (data_dict[key] == sql_dict[key])
@@ -387,7 +387,7 @@ def test_load_cycle_stats_small_dataset():
 
     # Pull loaded data and verify it matches.
     df_sql = pd.read_sql(
-        'SELECT * FROM test_data_cycle_stats WHERE test_id = '+str(Values.TEST_HELPER.test_id)+';', Values.TEST_HELPER.engine)
+        'SELECT * FROM test_data_cycle_stats WHERE test_id = '+str(Values.TEST_HELPER.test_id)+' ORDER BY cycle;', Values.TEST_HELPER.engine)
     sql_dict = df_sql.to_dict(orient='list')
     for key in data_dict.keys():
         assert (data_dict[key] == sql_dict[key])
@@ -405,7 +405,7 @@ def test_load_cycle_stats_small_dataset():
 
     # Pull all loaded data and verify
     df_sql = pd.read_sql(
-        'SELECT * FROM test_data_cycle_stats WHERE test_id = '+str(Values.TEST_HELPER.test_id)+';', Values.TEST_HELPER.engine)
+        'SELECT * FROM test_data_cycle_stats WHERE test_id = '+str(Values.TEST_HELPER.test_id)+' ORDER BY cycle;', Values.TEST_HELPER.engine)
     sql_dict = df_sql.to_dict(orient='list')
     df = pd.concat([df, df_new])
     data_dict_combined = df.to_dict(orient='list')
