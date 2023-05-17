@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name,BG_Arbin_TestData_CCCV_Cell_2, Serial Number,, C:\Users\Arbin\Desktop\BG\TestData\BG_Arbin_TestData_CCCV_Cell_2_2022_05_22_124258,,,,,,,,
+,,Export Time,6/1/2022 14:47,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+26,5/22/2022 12:42,BG\BG_Arbin_CCCV_TestData+BG_TestData_Cell.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,2.5,,512,0,TRUE,FALSE

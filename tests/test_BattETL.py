@@ -93,6 +93,8 @@ class TestBattetl:
             'test_data', 'test_data_id')
         db_last_row_cycle_stats = Values.TEST_HELPER.read_last_row(
             'test_data_cycle_stats', 'cycle_stats_id')
+        db_last_row_cells_meta = Values.TEST_HELPER.read_last_row(
+            'cells_meta', 'cell_type_id')
 
         # Check that the voltage_mv is the same as the last row of the test_data table
         assert float(db_last_row_test_data[7]) == 4186.39, \
@@ -100,7 +102,7 @@ class TestBattetl:
 
         # Check that the maccor_energy_mwh is the same as the last row of the test_data table
         assert 'maccor_energy_mwh' in db_last_row_test_data[-1], \
-            'test_data other_detail should have maccor_energy_mwh'
+            'test_data other_details should have maccor_energy_mwh'
 
         # Check that the reported_charge_capacity_mah is the same as the last row of the cycle_stats table
         assert float(db_last_row_cycle_stats[4]) == 2743.710761367, \
@@ -108,6 +110,12 @@ class TestBattetl:
 
         # Check that the maccor_charge_thermocouple_max_c is the same as the last row of the cycle_stats table
         assert 'maccor_charge_thermocouple_max_c' in db_last_row_cycle_stats[-1], \
-            'cycle_stats other_detail should have maccor_charge_thermocouple_max_c'
+            'cycle_stats other_details should have maccor_charge_thermocouple_max_c'
+        
+        # Check that the datasheet is load correctly
+        with open(Values.cell.config['meta_data']['cell_meta']['datasheet'], 'rb') as f:
+            datasheet_data = f.read()
+        assert datasheet_data == db_last_row_cells_meta[7].tobytes(), \
+            'datasheet should be load correctly'
 
         Values.TEST_HELPER.delete_test_data()

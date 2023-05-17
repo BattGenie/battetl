@@ -12,6 +12,8 @@ MACCOR_TYPE2_PATH = os.path.join(MACCOR_PATH, 'type2_data')
 ARBIN_PATH = os.path.join(BASE_DATA_PATH, 'arbin_cycler_data')
 ARBIN_SINGLE_PATH = os.path.join(ARBIN_PATH, 'single_data_file')
 ARBIN_MULTIPLE_PATH = os.path.join(ARBIN_PATH, 'multiple_data_files')
+ICT_PATH = os.path.join(ARBIN_PATH, 'ict_data_files')
+CCCV_PATH = os.path.join(ARBIN_PATH, 'cccv_data_files')
 
 
 @pytest.mark.transform
@@ -201,11 +203,11 @@ def test_calc_maccor_cycle_stats():
     transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
 
     # Make sure reported/calculated charge and discharge capacity are within 1% of each other.
-    assert ((1 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
-                     transformer.cycle_stats.calculated_discharge_capacity_mah - 1).iloc[1:-1])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
+                        transformer.cycle_stats.calculated_discharge_capacity_mah - 1).iloc[1:-1])).all()
 
-    assert ((1 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
-                     transformer.cycle_stats.calculated_charge_capacity_mah - 1).iloc[1:-1])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
+                        transformer.cycle_stats.calculated_charge_capacity_mah - 1).iloc[1:-1])).all()
 
 
 @pytest.mark.transform
@@ -232,8 +234,90 @@ def test_calc_arbin_cycle_stats():
     transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
 
     # Make sure reported/calculated charge and discharge capacity are within 1% of each other.
-    assert ((1 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
-                     transformer.cycle_stats.calculated_discharge_capacity_mah - 1).iloc[1:-1])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
+                        transformer.cycle_stats.calculated_discharge_capacity_mah - 1).iloc[1:-1])).all()
 
-    assert ((1 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
-                     transformer.cycle_stats.calculated_charge_capacity_mah - 1).iloc[1:-1])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
+                        transformer.cycle_stats.calculated_charge_capacity_mah - 1).iloc[1:-1])).all()
+
+
+@pytest.mark.transform
+@pytest.mark.arbin
+@pytest.mark.stats
+def test_ict_data():
+    data_path = join(
+        ICT_PATH, 'BG_Arbin_TestData_ICT_Cell3_Channel_4_Wb_1.CSV')
+    stat_path = join(
+        ICT_PATH, 'BG_Arbin_TestData_ICT_Cell3_Channel_4_StatisticByCycle.CSV')
+    schedule_path = join(
+        ICT_PATH, 'BG_Arbin_TestData_ICT+BG_Arbin_TestData_xxxxx.sdx')
+
+    extractor = Extractor()
+    extractor.data_from_files([data_path])
+    extractor.data_from_files([stat_path])
+    schedule = extractor.schedule_from_files([schedule_path])
+
+    transformer = Transformer()
+    transformer.transform_test_data(extractor.raw_test_data)
+    transformer.transform_cycle_stats(extractor.raw_cycle_stats)
+
+    cv_voltage_thresh_mv = 4195
+    transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
+
+    # Make sure reported/calculated stats are within 1% of each other.
+    # TODO: Add additional criteria for ICT data (charge_time, discharge_time, etc.)
+    assert ((0.01 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
+                        transformer.cycle_stats.calculated_discharge_capacity_mah - 1).iloc[1:-1])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
+                        transformer.cycle_stats.calculated_charge_capacity_mah - 1).iloc[1:-1])).all()
+
+
+@pytest.mark.transform
+@pytest.mark.arbin
+@pytest.mark.stats
+def test_cccv_data():
+    import pandas as pd
+
+    data_path = join(
+        CCCV_PATH, 'BG_Arbin_TestData_CCCV_Cell_2_Channel_26_Wb_1.CSV')
+    stat_path = join(
+        CCCV_PATH, 'BG_Arbin_TestData_CCCV_Cell_2_Channel_26_StatisticByCycle.CSV')
+    schedule_path = join(
+        CCCV_PATH, 'BG_Arbin_Cell_TestData_CCCCV+BG_Arbin_Cell.sdx')
+
+    extractor = Extractor()
+    extractor.data_from_files([data_path])
+    extractor.data_from_files([stat_path])
+    schedule = extractor.schedule_from_files([schedule_path])
+
+    transformer = Transformer()
+    transformer.transform_test_data(extractor.raw_test_data)
+    transformer.transform_cycle_stats(extractor.raw_cycle_stats)
+
+    cv_voltage_thresh_mv = 4200
+    transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
+
+    true_values = pd.DataFrame(
+        columns=['cycle', 'cc_cap', 'cv_cap', 'cc_time', 'cv_time'])
+    true_values['cycle'] = pd.Series([1, 2, 3])
+    true_values['cc_cap'] = pd.Series([0, 2567.811, 2561.239])
+    true_values['cv_cap'] = pd.Series([0, 6.2E-02, 2.743])
+    true_values['cc_time'] = pd.Series([0, 73971.1505, 36904.3838])
+    true_values['cv_time'] = pd.Series([0, 1.7623, 60.6568])
+
+    # Make sure calculated CC-CV stats are within 1% of actual value.
+    assert ((0.01 > abs(transformer.cycle_stats.calculated_cc_charge_time_s /
+                        true_values['cc_time'] - 1).fillna(0))).all()
+    assert ((0.01 > abs(transformer.cycle_stats.calculated_cv_charge_time_s /
+                        true_values['cv_time'] - 1).fillna(0))).all()
+    assert ((0.01 > abs(transformer.cycle_stats.calculated_cc_capacity_mah /
+                        true_values['cc_cap'] - 1).fillna(0))).all()
+    assert ((0.01 > abs(transformer.cycle_stats.calculated_cv_capacity_mah /
+                        true_values['cv_cap'] - 1).fillna(0))).all()
+
+    # Make sure sum of CC-CV values are within 1% of reported total values.
+    # Ignore first row because it just has CC step.
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_time_s /
+                        (true_values['cc_time'] + true_values['cv_time']) - 1).iloc[1:])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
+                        (true_values['cc_cap'] + true_values['cv_cap']) - 1).iloc[1:])).all()

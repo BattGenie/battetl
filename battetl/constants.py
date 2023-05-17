@@ -34,7 +34,7 @@ class Constants:
         'recorded_datetime',
         'unixtime_s',
         'thermocouple_temp_c',
-        'other_detail',
+        'other_details',
     }
     COLUMNS_CYCLE_STATS = {
         'cycle_stats_id',
@@ -61,7 +61,7 @@ class Constants:
         'calculated_eighty_percent_charge_time_s',
         'calculated_charge_energy_mwh',
         'calculated_discharge_energy_mwh',
-        'other_detail',
+        'other_details',
     }
     COLUMNS_ARBIN_TEST_DATA_ONLY = {
         'Date Time',

@@ -371,7 +371,7 @@ class Transformer:
         # DataFrame where we will hold calculated cycle statistics for all cycles
         df_calced_stats = pd.DataFrame(columns=['cycle'])
 
-        for cycle in range(self.test_data.cycle.head(1).item(), self.test_data.cycle.tail(1).item()):
+        for cycle in range(self.test_data.cycle.head(1).item(), self.test_data.cycle.tail(1).item()+1):
 
             cycle_data = self.test_data[self.test_data.cycle == cycle]
             if cycle_data.empty:
@@ -442,39 +442,26 @@ class Transformer:
                         str(cycle_data.cycle.iloc[0]))
             return stats
 
-        cumulative_tuple = self.__calc_cumulative_capacity(
-            chg_data, charge_steps, 'charge')
-        stats['calculated_charge_capacity_mah'] = cumulative_tuple[0]
-        stats['calculated_charge_energy_mwh'] = cumulative_tuple[1]
-        stats['calculated_charge_time_s'] = (chg_data.test_time_s.iloc[-1] -
-                                             chg_data.test_time_s.iloc[0])
+        ez_df = self.__ez_calc_df(
+            chg_data, charge_steps, 'charge', cv_voltage_thresh_mv)
 
-        # Calculate cc/cv time & capacity.
-        chg_data_cv = chg_data[chg_data.voltage_mv > cv_voltage_thresh_mv]
-        if chg_data_cv.empty:
-            logger.info("No CV data for cycle " +
-                        str(cycle_data.cycle.iloc[0]))
-            stats['calculated_cc_charge_time_s'] = stats['calculated_charge_time_s']
-            stats['calculated_cv_charge_time_s'] = float("nan")
-            stats['calculated_cc_capacity_mah'] = stats['calculated_charge_capacity_mah']
-            stats['calculated_cv_capacity_mah'] = float("nan")
-        else:
-            stats['calculated_cc_charge_time_s'] = (chg_data_cv.iloc[0].test_time_s
-                                                    - chg_data.iloc[0].test_time_s)
-            stats['calculated_cv_charge_time_s'] = (chg_data_cv.test_time_s.iloc[-1]
-                                                    - chg_data_cv.test_time_s.iloc[0])
-            stats['calculated_cc_capacity_mah'] = chg_data_cv.iloc[0].charge_capacity_mah
-            stats['calculated_cv_capacity_mah'] = (chg_data_cv.charge_capacity_mah.iloc[-1]
-                                                   - chg_data_cv.charge_capacity_mah.iloc[0])
+        stats['calculated_charge_capacity_mah'] = ez_df['charge_capacity_mah'].iloc[-1]
+        stats['calculated_charge_energy_mwh'] = ez_df['charge_energy_mwh'].iloc[-1]
+        stats['calculated_charge_time_s'] = ez_df['ellapsed_time_s'].iloc[-1]
+
+        stats['calculated_cc_charge_time_s'] = ez_df.cc_time_s.sum()
+        stats['calculated_cv_charge_time_s'] = ez_df.cv_time_s.sum()
+        stats['calculated_cc_capacity_mah'] = ez_df.cc_capacity_mah.sum()
+        stats['calculated_cv_capacity_mah'] = ez_df.cv_capacity_mah.sum()
 
         # Calculate 50%/80% charge time & capacity.
         eighty_percent_cap_mah = stats['calculated_charge_capacity_mah'] * 0.8
         fifty_percent_cap_mah = stats['calculated_charge_capacity_mah'] * 0.5
         try:
-            eighty_percent_cap_time_s = (chg_data[chg_data.charge_capacity_mah > eighty_percent_cap_mah].test_time_s.iloc[0]
-                                         - chg_data.test_time_s.iloc[0])
-            half_percent_cap_time_s = (chg_data[chg_data.charge_capacity_mah > fifty_percent_cap_mah].test_time_s.iloc[0]
-                                       - chg_data.test_time_s.iloc[0])
+            eighty_percent_cap_time_s = (ez_df[ez_df.charge_capacity_mah > eighty_percent_cap_mah].ellapsed_time_s.iloc[0]
+                                         - ez_df.ellapsed_time_s.iloc[0])
+            half_percent_cap_time_s = (ez_df[ez_df.charge_capacity_mah > fifty_percent_cap_mah].ellapsed_time_s.iloc[0]
+                                       - ez_df.ellapsed_time_s.iloc[0])
         except:
             eighty_percent_cap_time_s = float('nan')
             half_percent_cap_time_s = float('nan')
@@ -512,69 +499,127 @@ class Transformer:
                         str(cycle_data.cycle.iloc[0]))
             return stats
 
-        cumulative_tuple = self.__calc_cumulative_capacity(
-            dsg_data, discharge_steps, 'discharge')
-        stats['calculated_discharge_capacity_mah'] = cumulative_tuple[0]
-        stats['calculated_discharge_energy_mwh'] = cumulative_tuple[1]
-        stats['calculated_discharge_time_s'] = dsg_data.test_time_s.iloc[-1] - \
-            dsg_data.test_time_s.iloc[0]
+        ez_df = self.__ez_calc_df(dsg_data, discharge_steps, 'discharge')
+
+        stats['calculated_discharge_capacity_mah'] = ez_df['discharge_capacity_mah'].iloc[-1]
+        stats['calculated_discharge_energy_mwh'] = ez_df['discharge_energy_mwh'].iloc[-1]
+        stats['calculated_discharge_time_s'] = ez_df['ellapsed_time_s'].iloc[-1]
 
         return stats
 
-    def __calc_cumulative_capacity(self, df: pd.DataFrame, steps: list, step_type: str) -> tuple:
+    def __ez_calc_df(self, cycle_df: pd.DataFrame, steps: list, step_type: str, cv_voltage_thresh_mv=None) -> tuple:
         """
-        Calculates cumulative capacity from the dataframe from steps within 
-        the predefined list.
+        Creates a DataFrame we can easily use to calculate cycle statistics.
+
+        Modifies test_data to cummulative capacity in cases where capacity is reset at each step.
 
         Parameters
         ----------
         df : pd.DataFrame
-            A dataframe containing data to calculate capacity from. Will be modified
-            in place if capacity is reset after each step.
+            The DataFrame use to calculate cumulative capacity.
         steps : list
-            A list of the steps to calculate cumulative
+            A list of the steps to calculate cumulative capacity for. 
         step_type : str
-            The type of data we are calculating for. Can either be 'charge' or 'discharge'. If 
-            something else is passed an error is thrown.
+            Either 'charge' or 'discharge' depending on what type of steps we are calculating for.
+        cv_voltage_thresh_mv : float
+            The voltage threshold in mV above which charge is considered to be constant voltage.    
 
         Returns
         -------
-        (cumulative_capacity_mah, cumulative_energy_mwh): tuple
-            Tuple containing cumulative capacity and cumulative energy from the step data.
+        ez_df: pd.DataFrame
+            Dataframe containing values filtered to charge steps with cumulative capacity
+            and ellapsed time calculated.
         """
         logger.debug(f'Calculating cumulative {step_type} capacity')
 
+        time_col = 'ellapsed_time_s'
+        volt_col = 'voltage_mv'
+        cc_time = 'cc_time_s'
+        cv_time = 'cv_time_s'
+        cc_cap = 'cc_capacity_mah'
+        cv_cap = 'cv_capacity_mah'
         if step_type == 'charge':
-            capacity_column = 'charge_capacity_mah'
-            energy_column = 'charge_energy_mwh'
+            cap_col = 'charge_capacity_mah'
+            eng_col = 'charge_energy_mwh'
         elif step_type == 'discharge':
-            capacity_column = 'discharge_capacity_mah'
-            energy_column = 'discharge_energy_mwh'
+            cap_col = 'discharge_capacity_mah'
+            eng_col = 'discharge_energy_mwh'
+        else:
+            logger.error(f'Unknown step type {step_type}!')
+            return pd.DataFrame()
 
-        logger.debug(
-            f'Capacity column: {capacity_column}. Energy column: {energy_column}')
+        ez_df = pd.DataFrame(
+            columns=[time_col, volt_col, cap_col, eng_col, cc_time, cv_time, cc_cap, cv_cap])
 
-        # Calculate cumulative capacity/energy from each of the steps.
-        cumulative_capacity_mah = 0
-        cumulative_energy_mwh = 0
+        # Iterate through each charge step to calculate cumulative capacity
+
         for i, step in enumerate(steps):
-            step_data = df[df.step == step]
-            if step_data.empty:
+
+            step_slice = cycle_df[cycle_df.step == step]
+            step_df = pd.DataFrame(
+                columns=[time_col, volt_col, cap_col, eng_col, cc_time, cv_time, cc_cap, cv_cap])
+
+            if step_slice.empty:
                 continue
 
-            if i == 0:
-                cumulative_capacity_mah = step_data[capacity_column].iloc[-1] - \
-                    step_data[capacity_column].iloc[0]
-                cumulative_energy_mwh = step_data[energy_column].iloc[-1] - \
-                    step_data[energy_column].iloc[0]
+            if ez_df.empty:
+                ez_df[time_col] = step_slice['test_time_s'] - \
+                    step_slice['test_time_s'].iloc[0]
+                ez_df[volt_col] = step_slice['voltage_mv']
+                ez_df[eng_col] = step_slice[eng_col] - \
+                    step_slice[eng_col].iloc[0]
+                ez_df[cap_col] = step_slice[cap_col] - \
+                    step_slice[cap_col].iloc[0]
+                if step_type == 'charge':
+                    # if ez_df is empty, we're at beginning of a cycle and cap/step time should be reset to zero
+                    # TODO: add documentation for this
+                    delta_time = step_slice['step_time_s'] - \
+                        step_slice['step_time_s'].shift(1, fill_value=0)
+                    ez_df[cc_time] = np.where(
+                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_time, 0)
+                    ez_df[cv_time] = np.where(
+                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_time, 0)
+                    delta_cap = step_slice[cap_col] - \
+                        step_slice[cap_col].shift(1, fill_value=0)
+                    ez_df[cc_cap] = np.where(
+                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_cap, 0)
+                    ez_df[cv_cap] = np.where(
+                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_cap, 0)
+                # TODO: corner case of ICT will still need above logic for discharge
+                elif step_type == 'discharge':
+                    ez_df[[cc_time, cc_cap, cv_time, cv_cap]] = np.nan
             else:
-                # This check statement addresses instances where capacity was reset after each step.
-                if step_data[capacity_column].iloc[0] < cumulative_capacity_mah:
-                    step_data[capacity_column] += cumulative_capacity_mah
-                    step_data[energy_column] += cumulative_energy_mwh
-                cumulative_capacity_mah += step_data[capacity_column].iloc[-1] - \
-                    step_data[capacity_column].iloc[0]
-                cumulative_energy_mwh += step_data[energy_column].iloc[-1] - \
-                    step_data[energy_column].iloc[0]
-
-        return (cumulative_capacity_mah, cumulative_energy_mwh)
+                # This catches if capacity was reset after each step. Modifies test_data DF in place.
+                if step_slice[cap_col].iloc[0] < ez_df[cap_col].iloc[-1]:
+                    current_cycle = cycle_df.cycle.iloc[0]
+                    self.test_data.loc[self.test_data.cycle == current_cycle,
+                                       self.test_data.step == step, cap_col] += ez_df[cap_col]
+                    self.test_data.loc[self.test_data.cycle == current_cycle,
+                                       self.test_data.step == step, eng_col] += ez_df[eng_col]
+                if not ez_df.empty:
+                    # keeps running time across steps. ignoring time between steps
+                    step_df[time_col] = (
+                        step_slice['test_time_s'] - step_slice['test_time_s'].iloc[0]) + ez_df[time_col].iloc[-1]
+                # step_slice is updated with above updates to test_data because it's a slice, not copy, of test_data
+                step_df[volt_col] = step_slice[volt_col]
+                step_df[cap_col] = step_slice[cap_col]
+                step_df[eng_col] = step_slice[eng_col]
+                if step_type == 'charge':
+                    # calculate the delta time/cap for each step, sum the deltas in calc_stats() to get cycle time/cap
+                    delta_time = step_slice['step_time_s'] - \
+                        step_slice['step_time_s'].shift(1, fill_value=0)
+                    step_df[cc_time] = np.where(
+                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_time, 0)
+                    step_df[cv_time] = np.where(
+                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_time, 0)
+                    delta_cap = step_slice[cap_col] - step_slice[cap_col].shift(
+                        1, fill_value=ez_df[cap_col].iloc[-1])
+                    step_df[cc_cap] = np.where(
+                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_cap, 0)
+                    step_df[cv_cap] = np.where(
+                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_cap, 0)
+                elif step_type == 'discharge':
+                    step_df[[cc_time, cc_cap, cv_time, cv_cap]] = np.nan
+                ez_df = pd.concat([ez_df, step_df])
+        logger.debug(f'Finished calculating cumulative {step_type} capacity')
+        return ez_df
