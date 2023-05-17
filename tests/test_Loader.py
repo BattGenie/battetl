@@ -283,8 +283,8 @@ def test_load_test_data_small_dataset():
     df_sql = pd.read_sql('SELECT * FROM test_data WHERE test_id = ' +
                          str(Values.TEST_HELPER.test_id) + ' ORDER BY unixtime_s;', Values.TEST_HELPER.engine)
     sql_dict = df_sql.to_dict(orient='list')
-    # Convert the other_detail column to a list of dicts.
-    pd_other_detail = [json.loads(row) for row in [
+    # Convert the other_details column to a list of dicts.
+    pd_other_details = [json.loads(row) for row in [
         '{"other_1": "a", "other_2": 1}',
         '{"other_1": "b", "other_2": 2}'
     ]]
@@ -292,8 +292,8 @@ def test_load_test_data_small_dataset():
     for key in data_dict.keys():
         if key == 'other_1' or key == 'other_2':
             # The other_1 and other_2 columns are stored as JSON strings.
-            sq_dict_other_detail = [row for row in sql_dict['other_detail']]
-            assert (sq_dict_other_detail == pd_other_detail)
+            sq_dict_other_details = [row for row in sql_dict['other_details']]
+            assert (sq_dict_other_details == pd_other_details)
         else:
             assert (data_dict[key] == sql_dict[key])
 
@@ -323,8 +323,8 @@ def test_load_test_data_small_dataset():
     sql_dict = df_sql.to_dict(orient='list')
     df = pd.concat([df, df_new])
     data_dict_combined = df.to_dict(orient='list')
-    # Convert the other_detail column to a list of dicts.
-    pd_other_detail_combined = [json.loads(row) if row else None for row in [
+    # Convert the other_details column to a list of dicts.
+    pd_other_details_combined = [json.loads(row) if row else None for row in [
         '{"other_1": "a", "other_2": 1}',
         '{"other_1": "b", "other_2": 2}',
         None,
@@ -334,9 +334,9 @@ def test_load_test_data_small_dataset():
     # Verify loaded data against all reference data.
     for key in data_dict_combined.keys():
         if key == 'other_1' or key == 'other_2':
-            sq_dict_other_detail = [
-                row if row else None for row in sql_dict['other_detail']]
-            assert (pd_other_detail_combined == pd_other_detail_combined)
+            sq_dict_other_details = [
+                row if row else None for row in sql_dict['other_details']]
+            assert (pd_other_details_combined == pd_other_details_combined)
         else:
             assert (data_dict_combined[key] == sql_dict[key])
 

@@ -31,8 +31,7 @@ class BattDbTestHelper(Loader):
         likely there is data in the database thats needs to be cleared. Easiest course 
         of action in that case is rebuilding the database from scratch. 
         '''
-        self.cell_type_id = self._Loader__perform_insert(
-            target_table='cells_meta', dict_to_load=self.config['cell_meta'], pk_id_col='cell_type_id')
+        self.cell_type_id = self._Loader__insert_cell_meta()
         assert (self.cell_type_id)
 
         upload_dict = {**self.config['cell'],

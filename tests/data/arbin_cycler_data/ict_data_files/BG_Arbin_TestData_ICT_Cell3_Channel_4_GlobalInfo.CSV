@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name, BG_Arbin_TestData_ICT_Cell3, Serial Number,, C:\Users\Arbin\Desktop\BG\Arbin_TestData\BG_Arbin_TestData_ICT_Cell3_2023_04_10_144351,,,,,,,,
+,,Export Time,5/1/2023 11:50,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+4,4/10/2023 14:43,BG\Arbin_TestData\BG_Arbin_TestData_ICT+BG_Arbin_TestData_xxxxx.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,7.1,,512,0,TRUE,FALSE

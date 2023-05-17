@@ -95,7 +95,7 @@ class BattETL:
                 extractor.schedule_from_files(
                     self.config['schedule_file_path'])
                 self.schedule = extractor.schedule
-                self.config['meta_data']['schedule_meta']['schedule_files'] = json.dumps(extractor.schedule)
+                self.config['meta_data']['schedule_meta']['details'] = json.dumps(extractor.schedule)
             except Exception as e:
                 logger.error('Failed to extract schedule', exc_info=True)
                 logger.error(e)

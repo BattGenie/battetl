@@ -10,7 +10,7 @@ import sqlalchemy
 import sqlalchemy.orm
 import numpy as np
 import pandas as pd
-from schema import Schema, Use, Optional, SchemaError
+from schema import Schema, Use, Optional, And, SchemaError
 
 # progress bar
 from tqdm import tqdm
@@ -86,13 +86,19 @@ class Loader:
                 'schedule_name': str,
                 'cycler_make': str,
                 Optional('schedule_id'): Use(int),
-                Optional('test_type'): str,
+                Optional('test_type'): And(
+                    str,
+                    lambda s: s in [
+                        'ICT', 'Characterization', 'Baseline life cycling',
+                        'MBC life cycling', 'MBC quick test', 'Pretest', 'HPPC'
+                    ]
+                ),
                 Optional('cycler_make'): str,
                 Optional('date_created'): str,
                 Optional('created_by'): str,
                 Optional('comments'): str,
                 Optional('cv_voltage_threshold_mv'): Use(float),
-                Optional('schedule_files'): str,
+                Optional('details'): str,
             },
             'cell': {
                 'manufacturer_sn': str,
@@ -116,6 +122,7 @@ class Loader:
                 Optional('capacity_mah'): Use(float),
                 Optional('chemistry'): str,
                 Optional('dimensions'): str,
+                Optional('datasheet'): str,  # File path
             },
         })
 
@@ -156,8 +163,8 @@ class Loader:
                 df_copy = df_copy[df_copy['unixtime_s'] > latest_unixtime_s]
 
             if df_copy.shape[0] > 0:
-                # Move fields to other_detail
-                df_copy = self.__create_other_detail(
+                # Move fields to other_details
+                df_copy = self.__create_other_details(
                     df_copy, Constants.COLUMNS_TEST_DATA)
 
                 for column in df_copy.columns:
@@ -211,8 +218,8 @@ class Loader:
 
         df_copy = df.copy(deep=True)
 
-        # Move fields to other_detail
-        df_copy = self.__create_other_detail(
+        # Move fields to other_details
+        df_copy = self.__create_other_details(
             df_copy, Constants.COLUMNS_CYCLE_STATS)
 
         for column in df_copy.columns:
@@ -381,31 +388,31 @@ class Loader:
 
         return success
 
-    def __create_other_detail(self, df: pd.DataFrame, table_columns: set) -> pd.DataFrame:
+    def __create_other_details(self, df: pd.DataFrame, table_columns: set) -> pd.DataFrame:
         """
-        Creates the other_detail column in the DataFrame. This column contains
+        Creates the other_details column in the DataFrame. This column contains
         all fields that are not in the target table.
 
         Parameters
         ----------
         df : pd.DataFrame
-            DataFrame to create other_detail column
+            DataFrame to create other_details column
         table_columns : set
             Set of columns in the target table
 
         Returns
         -------
         df : pd.DataFrame
-            DataFrame with other_detail column
+            DataFrame with other_details column
         """
-        other_detail_columns = set(df.columns) - set(table_columns)
+        other_details_columns = set(df.columns) - set(table_columns)
 
-        if other_detail_columns:
+        if other_details_columns:
             logger.info(
-                f'Move fields to other_detail: {", ".join(other_detail_columns)}')
-            df['other_detail'] = df.progress_apply(
+                f'Move fields to other_details: {", ".join(other_details_columns)}')
+            df['other_details'] = df.progress_apply(
                 lambda row: json.dumps({
-                    c: row[c] for c in other_detail_columns if not pd.isnull(row[c])
+                    c: row[c] for c in other_details_columns if not pd.isnull(row[c])
                 }),
                 axis=1,
             )
@@ -706,6 +713,19 @@ class Loader:
         upload_dict = copy.deepcopy(self.config['cell_meta'])
 
         logger.debug(f'Inserting cell_meta: {json.dumps(upload_dict)}')
+
+        # Check if 'datasheet' key exists in upload_dict and the file exists
+        if 'datasheet' in upload_dict:
+            if os.path.exists(upload_dict['datasheet']):
+                logger.info(f'Found datasheet file: {upload_dict["datasheet"]}')
+                # Convert pdf file to binary data
+                with open(upload_dict['datasheet'], 'rb') as f:
+                    datasheet_data = f.read()
+                # Add binary data to upload_dict
+                upload_dict['datasheet'] = datasheet_data
+            else:
+                logger.error(f'Could not find datasheet file: {upload_dict["datasheet"]}')
+
         return self.__perform_insert(target_table='cells_meta', dict_to_load=upload_dict, pk_id_col='cell_type_id')
 
     def __insert_schedule_meta(self) -> int:
@@ -778,8 +798,13 @@ class Loader:
 
         # Remove any empty entries from upload dict
         dict_to_load = {k: v for k, v in dict_to_load.items() if v}
+        log_dict_to_load = dict(dict_to_load)
+        for k, v in log_dict_to_load.items():
+            # Convert binary data to string for logging
+            if isinstance(v, bytes):
+                log_dict_to_load[k] = '[binary data]'
         logger.debug(
-            f'Inserting into {target_table} with {json.dumps(dict_to_load)}')
+            f'Inserting into {target_table} with {log_dict_to_load}')
         pk_id = None
 
         try:

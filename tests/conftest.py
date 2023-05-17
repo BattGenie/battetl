@@ -39,7 +39,8 @@ def cell_config():
             },
             "cell_meta": {
                 "manufacturer": "FakeMN",
-                "manufacturer_pn": "1234"
+                "manufacturer_pn": "1234",
+                "datasheet": "tests/data/test_datasheet.pdf"
             },
             "schedule_meta": {
                 "schedule_name": "fake_schedule.000",
