@@ -199,7 +199,7 @@ def data_row():
                 'thermocouple_1_c': 26.55,
                 'unixtime_s': 1585288814,
                 'thermocouple_temps_c': [26.55]
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
             test_data_harmonized = pd.DataFrame([{
                 'cycle': 0,
@@ -221,7 +221,7 @@ def data_row():
                 'discharge_capacity_mah': np.nan,
                 'charge_energy_mwh': np.nan,
                 'discharge_energy_mwh': np.nan
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
             test_data_type2 = pd.DataFrame([{
                 'rec': '1',
@@ -239,7 +239,7 @@ def data_row():
                 'recorded_datetime': pd.Timestamp('2023-03-25 18:03:38+00:00', tz='America/Los_Angeles').tz_convert('UTC'),
                 'unixtime_s': 1679767418,
                 'thermocouple_temps_c': []
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
             cycle_stats = pd.DataFrame([{
                 'cycle': 0.0,
@@ -262,7 +262,7 @@ def data_row():
                 'maccor_discharge_thermocouple_min_c': np.nan,
                 'maccor_discharge_thermocouple_max_c': np.nan,
                 'date': 43916.9647483565
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
             cycle_stats_calced = pd.DataFrame([{
                 'cycle': 0.0,
@@ -298,7 +298,7 @@ def data_row():
                 'calculated_discharge_capacity_mah': np.nan,
                 'calculated_discharge_energy_mwh': np.nan,
                 'calculated_discharge_time_s': np.nan
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
         class arbin:
             test_data = pd.DataFrame([{
@@ -326,7 +326,7 @@ def data_row():
                 'aux_dt/dt_2 (c/s)': -0.002137546,
                 'unixtime_s': 1653248590,
                 'thermocouple_temps_c': [24.25, 24.64854]
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
             test_data_harmonized = pd.DataFrame([{
                 'data_point': 1,
@@ -356,7 +356,7 @@ def data_row():
                 'discharge_capacity_mah': np.nan,
                 'charge_energy_mwh': np.nan,
                 'discharge_energy_mwh': np.nan
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
             cycle_stats = pd.DataFrame([{
                 'recorded_datetime': '\t05/22/2022 14:06:34.312',
@@ -380,6 +380,6 @@ def data_row():
                 'aux_dt/dt_1 (c/s)': 0.0,
                 'thermocouple_2_c': 24.7937816681912,
                 'aux_dt/dt_2 (c/s)': 0.0010763981880476,
-            }]).iloc[0]
+            }], dtype=object).iloc[0]
 
     return data

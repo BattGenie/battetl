@@ -1,7 +1,7 @@
 # Base requirements
 python-dotenv==0.21.1
-pandas==1.4.1
-SQLAlchemy==1.4.22
+pandas==2.0.3
+SQLAlchemy==2.0.18
 psycopg2-binary==2.9.6
 pydash==5.1.0
 xmltodict==0.12.0
