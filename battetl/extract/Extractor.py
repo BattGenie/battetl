@@ -17,8 +17,8 @@ class Extractor:
         """
         self.raw_test_data_meta_data = []
         self.raw_cycle_stats_meta_data = []
-        self.raw_test_data = pd.DataFrame()
-        self.raw_cycle_stats = pd.DataFrame()
+        self.raw_test_data = pd.DataFrame(dtype=object)
+        self.raw_cycle_stats = pd.DataFrame(dtype=object)
         self.cycler_make = ''
 
         self.schedule = {

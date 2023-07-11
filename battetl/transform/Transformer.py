@@ -38,8 +38,8 @@ class Transformer:
         if self.user_transform_cycle_stats:
             logger.info('User defined transform_cycle_stats function found')
 
-        self.test_data = pd.DataFrame()
-        self.cycle_stats = pd.DataFrame()
+        self.test_data = pd.DataFrame(dtype=object)
+        self.cycle_stats = pd.DataFrame(dtype=object)
 
     def transform_test_data(self, data: pd.DataFrame) -> pd.DataFrame:
         """
@@ -80,7 +80,7 @@ class Transformer:
         if self.user_transform_test_data:
             df = self.user_transform_test_data(df)
 
-        self.test_data = df
+        self.test_data = df.astype(object)
         return df
 
     def transform_cycle_stats(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -116,7 +116,7 @@ class Transformer:
         if self.user_transform_cycle_stats:
             df = self.user_transform_cycle_stats(df)
 
-        self.cycle_stats = df
+        self.cycle_stats = df.astype(object)
         return df
 
     def __transform_arbin_test_data(self, df: pd.DataFrame) -> pd.DataFrame:

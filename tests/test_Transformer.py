@@ -318,10 +318,10 @@ def test_cccv_data():
 
     # Make sure sum of CC-CV values are within 1% of reported total values.
     # Ignore first row because it just has CC step.
-    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_time_s /
-                        (true_values['cc_time'] + true_values['cv_time']) - 1).iloc[1:])).all()
-    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
-                        (true_values['cc_cap'] + true_values['cv_cap']) - 1).iloc[1:])).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_time_s.iloc[1:] /
+                        (true_values['cc_time'].iloc[1:] + true_values['cv_time'].iloc[1:]) - 1))).all()
+    assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah.iloc[1:] /
+                        (true_values['cc_cap'].iloc[1:] + true_values['cv_cap'].iloc[1:]) - 1))).all()
 
 
 @pytest.mark.transform
