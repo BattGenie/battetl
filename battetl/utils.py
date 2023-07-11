@@ -110,6 +110,27 @@ class Utils:
 
         return df
 
+    def drop_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        The function drops empty rows from DataFrame
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            DataFrame to drop empty rows from.
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            Pandas DataFrame with the empty rows dropped.
+        """
+        all_na_count = (df.isna().all(axis=1)).sum()
+        if all_na_count > 0:
+            logger.info(f'Drop {all_na_count} empty rows')
+            df = df.dropna(how='all')
+
+        return df
+
     def get_cycle_make(columns: list) -> tuple[str, str]:
         """
         Determine the make and type of cycler.
@@ -140,8 +161,12 @@ class Utils:
             Constants.COLUMNS_MACCOR_TEST_DATA_ONLY)
         maccorTestDataSetType2 = Utils.get_lower_strip_set(
             Constants.COLUMNS_MACCOR_TEST_DATA_TYPE2_ONLY)
+        maccorTestDataSetCustomer1 = Utils.get_lower_strip_set(
+            Constants.COLUMNS_MACCOR_TEST_DATA_CUSTOMER1)
         maccorCycleStatsSet = Utils.get_lower_strip_set(
             Constants.COLUMNS_MACCOR_CYCLE_STATS_ONLY)
+        maccorCycleStatsSetCustomer1 = Utils.get_lower_strip_set(
+            Constants.COLUMNS_MACCOR_CYCLE_STATS_CUSTOMER1)
 
         if len(columnsSet & arbinTestDataSet) >= (len(arbinTestDataSet) / 2):
             return Constants.MAKE_ARBIN, Constants.DATA_TYPE_TEST_DATA
@@ -155,7 +180,13 @@ class Utils:
         if len(columnsSet & maccorTestDataSetType2) >= (len(maccorTestDataSetType2) / 2):
             return Constants.MAKE_MACCOR, Constants.DATA_TYPE_TEST_DATA
 
+        if len(columnsSet & maccorTestDataSetCustomer1) >= (len(maccorTestDataSetCustomer1) / 2):
+            return Constants.MAKE_MACCOR, Constants.DATA_TYPE_TEST_DATA
+
         if len(columnsSet & maccorCycleStatsSet) >= (len(maccorCycleStatsSet) / 2):
+            return Constants.MAKE_MACCOR, Constants.DATA_TYPE_CYCLE_STATS
+
+        if len(columnsSet & maccorCycleStatsSetCustomer1) >= (len(maccorCycleStatsSetCustomer1) / 2):
             return Constants.MAKE_MACCOR, Constants.DATA_TYPE_CYCLE_STATS
 
         return None, None
@@ -363,6 +394,23 @@ class Utils:
         logger.debug(
             f'Can not find format in {format_list}, use default')
         return pd.to_datetime(df[column])
+
+    def convert_to_float(value):
+        '''
+        Converts value to float if it is a string.
+
+        Parameters
+        ----------
+        value : str or float
+            The value to convert.
+
+        Returns
+        -------
+        float
+        '''
+        if isinstance(value, str):
+            return float(value.replace(',', ''))
+        return value
 
 
 class DashOrderedDict(OrderedDict):

@@ -14,6 +14,7 @@ ARBIN_SINGLE_PATH = os.path.join(ARBIN_PATH, 'single_data_file')
 ARBIN_MULTIPLE_PATH = os.path.join(ARBIN_PATH, 'multiple_data_files')
 ICT_PATH = os.path.join(ARBIN_PATH, 'ict_data_files')
 CCCV_PATH = os.path.join(ARBIN_PATH, 'cccv_data_files')
+RESET_CAP_PATH = os.path.join(MACCOR_PATH, 'reset_cap_data')
 
 
 @pytest.mark.transform
@@ -199,8 +200,8 @@ def test_calc_maccor_cycle_stats():
     transformer.transform_test_data(df_data_raw)
     transformer.transform_cycle_stats(df_stats_raw)
 
-    cv_voltage_thresh_mv = 4195
-    transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4195)
 
     # Make sure reported/calculated charge and discharge capacity are within 1% of each other.
     assert ((0.01 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
@@ -230,8 +231,8 @@ def test_calc_arbin_cycle_stats():
     transformer.transform_test_data(df_data_raw)
     transformer.transform_cycle_stats(df_stats_raw)
 
-    cv_voltage_thresh_mv = 4195
-    transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4195)
 
     # Make sure reported/calculated charge and discharge capacity are within 1% of each other.
     assert ((0.01 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
@@ -261,8 +262,8 @@ def test_ict_data():
     transformer.transform_test_data(extractor.raw_test_data)
     transformer.transform_cycle_stats(extractor.raw_cycle_stats)
 
-    cv_voltage_thresh_mv = 4195
-    transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4195)
 
     # Make sure reported/calculated stats are within 1% of each other.
     # TODO: Add additional criteria for ICT data (charge_time, discharge_time, etc.)
@@ -283,7 +284,7 @@ def test_cccv_data():
     stat_path = join(
         CCCV_PATH, 'BG_Arbin_TestData_CCCV_Cell_2_Channel_26_StatisticByCycle.CSV')
     schedule_path = join(
-        CCCV_PATH, 'BG_Arbin_Cell_TestData_CCCCV+BG_Arbin_Cell.sdx')
+        CCCV_PATH, 'BG_Arbin_Cell_TestData_CCCV+BG_Arbin_Cell.sdx')
 
     extractor = Extractor()
     extractor.data_from_files([data_path])
@@ -294,8 +295,8 @@ def test_cccv_data():
     transformer.transform_test_data(extractor.raw_test_data)
     transformer.transform_cycle_stats(extractor.raw_cycle_stats)
 
-    cv_voltage_thresh_mv = 4200
-    transformer.calc_cycle_stats(schedule['steps'], cv_voltage_thresh_mv)
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4200)
 
     true_values = pd.DataFrame(
         columns=['cycle', 'cc_cap', 'cv_cap', 'cc_time', 'cv_time'])
@@ -321,3 +322,106 @@ def test_cccv_data():
                         (true_values['cc_time'] + true_values['cv_time']) - 1).iloc[1:])).all()
     assert ((0.01 > abs(transformer.cycle_stats.reported_charge_capacity_mah /
                         (true_values['cc_cap'] + true_values['cv_cap']) - 1).iloc[1:])).all()
+
+
+@pytest.mark.transform
+@pytest.mark.arbin
+@pytest.mark.stats
+def test_capacity_reset_on_step():
+    data_path = join(
+        RESET_CAP_PATH, 'BG_Maccor_Cell_ResetCap_Take11 - 074.txt')
+    stat_path = join(
+        RESET_CAP_PATH, 'BG_Maccor_Cell_ResetCap_Take11 - 074 [STATS].txt')
+    schedule_path = join(
+        RESET_CAP_PATH, 'BG_Maccor_ResetCap.000')
+
+    extractor = Extractor()
+    extractor.data_from_files([data_path])
+    extractor.data_from_files([stat_path])
+    schedule = extractor.schedule_from_files([schedule_path])
+
+    transformer = Transformer()
+    transformer.transform_test_data(extractor.raw_test_data)
+    transformer.transform_cycle_stats(extractor.raw_cycle_stats)
+
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4429.5)
+
+    test_cycle = 7
+    cc_time = 1701.14
+    cc_cap = 2120.64
+    cv_time = 4541.32
+    cv_cap = 1354.83
+    discharge_time = 3447.77
+    discharge_cap = 3474.54
+    charge_time_50 = 1352.0
+    charge_time_80 = 2555.99
+
+    # Make sure calculated CC-CV stats are within 1% of actual value.
+    assert (0.01 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_cc_charge_time_s'] / cc_time - 1))
+    assert (0.01 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_cv_charge_time_s'] / cv_time - 1))
+    assert (0.01 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_cc_capacity_mah'] / cc_cap - 1))
+    assert (0.01 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_cv_capacity_mah'] / cv_cap - 1))
+    assert (0.01 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_discharge_time_s'] / discharge_time - 1))
+    assert (0.01 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_discharge_capacity_mah'] / discharge_cap - 1))
+
+    # Make sure 50% and 80% charge times are within 1% of actual value.
+    assert (0.1 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_fifty_percent_charge_time_s'] / charge_time_50 - 1))
+    assert (0.1 > abs(
+        transformer.cycle_stats.at[test_cycle, 'calculated_eighty_percent_charge_time_s'] / charge_time_80 - 1))
+
+    # Make sure reported/calculated stats are within 1% of each other.
+    # Only look at discharge. Reported charge cap is off because it's reset at each step. Shows the cap from the last charge step.
+    assert ((0.01 > abs(transformer.cycle_stats.reported_discharge_capacity_mah /
+                        transformer.cycle_stats.calculated_discharge_capacity_mah - 1).iloc[1:-1])).all()
+
+
+@pytest.mark.transform
+@pytest.mark.arbin
+@pytest.mark.stats
+def test_max_temperature():
+    import pandas as pd
+
+    data_path = join(
+        ARBIN_SINGLE_PATH, 'BG_Arbin_TestData_Single_File_Channel_26_Wb_1.pkl')
+    stat_path = join(
+        ARBIN_SINGLE_PATH, 'BG_Arbin_TestData_Single_File_Channel_26_StatisticByCycle.pkl')
+    schedule_path = join(
+        ARBIN_SINGLE_PATH, 'BG_25R_Characterization+BG_25R.sdx')
+
+    extractor = Extractor()
+    df_raw_test_data = extractor.from_pickle(data_path)
+    df_raw_cycle_stats = extractor.from_pickle(stat_path)
+    schedule = extractor.schedule_from_files([schedule_path])
+
+    transformer = Transformer()
+    transformer.transform_test_data(df_raw_test_data)
+    transformer.transform_cycle_stats(df_raw_cycle_stats)
+
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4195, cell_thermocouple=2)
+
+    max_temps = pd.DataFrame(
+        data=[[1, None, 25.09362588],
+              [2, 24.80076, 24.66491629],
+              [3, 24.94959932, 25.34211339],
+              [4, 25.09418, 26.08771662],
+              [5, 26.97403, 28.22165],
+              [6, 30.26020972, 31.67171],
+              [7, 38.144, 39.89985],
+              [8, 47.34957491, 48.98906797],
+              [9, 30.24211, None]],
+        columns=['cycle', 'max_charge_temp', 'max_discharge_temp'])
+
+    # check that max temperatures are within 0.001 C of expected values
+    assert (0.001 > abs(
+        transformer.cycle_stats.loc[0:7, 'calculated_max_discharge_temp_c'] - max_temps.loc[0:7, 'max_discharge_temp'])).all()
+    assert (0.001 > abs(
+        transformer.cycle_stats.loc[1:8, 'calculated_max_charge_temp_c'] - max_temps.loc[1:8, 'max_charge_temp'])).all()

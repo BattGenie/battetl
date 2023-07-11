@@ -33,7 +33,7 @@ class Constants:
         'voltage_mv',
         'recorded_datetime',
         'unixtime_s',
-        'thermocouple_temp_c',
+        'thermocouple_temps_c',
         'other_details',
     }
     COLUMNS_CYCLE_STATS = {
@@ -113,6 +113,51 @@ class Constants:
         'Date',
         'AH-OUT',
         'AH-IN',
+    }
+
+    COLUMNS_MACCOR_CYCLE_STATS_CUSTOMER1 = {
+        'Cycle',
+        'AH-IN',
+        'AH-OUT',
+        'T1_Start',
+        'T1_End',
+        'T1_Min',
+        'T1_Max',
+        'T1_Start',
+        'T1_End',
+        'T1_Min',
+        'T1_Max',
+        'Date',
+    }
+
+    COLUMNS_MACCOR_TEST_DATA_CUSTOMER1 = {
+        'Cyc#',
+        'Step',
+        'TestTime(s)',
+        'StepTime(s)',
+        'Capacity(Ah)',
+        'Watt-hr',
+        'Current(A)'
+        'Voltage(V)',
+        'ES',
+        'DPt Time',
+        'Volt 1',
+        'ManufacturerAccess (0x00)',
+        'AtRate (0x02)',
+        'AtRateTimeToEmpty (0x04)',
+        'Temperature (0x06)',
+        'Voltage (0x08)',
+        'BatteryStatus (0x0A)',
+        'Current (0x0C)',
+        'RemainingCapacity (0x10)',
+        'FullChargeCapacity (0x12)',
+        'AverageCurrent (0x14)',
+        'AverageTimeToEmpty (0x16)',
+        'AverageTimeToFull (0x18)',
+        'RelativeStateOfCharge (0x2C)',
+        'ChargingVoltage (0x30)',
+        'ChargingCurrent (0x32)',
+        'DesignCapacity (0x3C)',
     }
 
     COLUMNS_TO_MILLI = {

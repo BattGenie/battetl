@@ -15,6 +15,8 @@ class BattDbTestHelper(Loader):
     cycle_id = None
     schedule_id = None
     test_id = None
+    profile_id = None
+    customer_id = None
 
     def __init__(self, config: dict):
         '''
@@ -36,38 +38,49 @@ class BattDbTestHelper(Loader):
 
         upload_dict = {**self.config['cell'],
                        **{'cell_type_id': self.cell_type_id}}
-        self.cell_id = self._Loader__perform_insert(
+        self.cell_id = self._perform_insert(
             target_table='cells', dict_to_load=upload_dict, pk_id_col='cell_id')
         assert (self.cell_id)
 
-        self.cycler_type_id = self._Loader__perform_insert(
+        self.cycler_type_id = self._perform_insert(
             target_table='cyclers_meta', dict_to_load=self.config['cycler_meta'], pk_id_col='cycler_type_id')
         assert (self.cycler_type_id)
 
         upload_dict = {**self.config['cycler'],
                        **{'cycler_type_id': self.cycler_type_id}}
-        self.cycler_id = self._Loader__perform_insert(
+        self.cycler_id = self._perform_insert(
             target_table='cyclers', dict_to_load=upload_dict, pk_id_col='cycler_id')
         assert (self.cycler_id)
 
-        self.schedule_id = self._Loader__perform_insert(
+        self.schedule_id = self._perform_insert(
             target_table='schedule_meta', dict_to_load=self.config['schedule_meta'], pk_id_col='schedule_id')
         assert (self.schedule_id)
+
+        upload_dict = {**self.config['customers']}
+        self.customer_id = self._perform_insert(
+            target_table='customers', dict_to_load=upload_dict, pk_id_col='customer_id')
+        assert (self.customer_id)
+
+        upload_dict = {**self.config['projects'],
+                       'customer_id': self.customer_id}
+        self.project_id = self._perform_insert(
+            target_table='projects', dict_to_load=upload_dict, pk_id_col='project_id')
+        assert (self.project_id)
 
         upload_dict = {**self.config['test_meta'],
                        **{'cycler_id': self.cycler_id,
                           'schedule_id': self.schedule_id,
                           'cell_id': self.cell_id}}
-        self.test_id = self._Loader__perform_insert(
+        self.test_id = self._perform_insert(
             target_table='test_meta', dict_to_load=upload_dict, pk_id_col='test_id')
         assert (self.test_id)
 
         upload_dict = {'test_id': self.test_id,
-                       'user_id': 'test_helper'}
-        self.sil_id = self._Loader__perform_insert(
+                       'user_id': 'test_helper',
+                       'cell_type_id': self.cell_type_id}
+        self.sil_id = self._perform_insert(
             target_table='sil_meta', dict_to_load=upload_dict, pk_id_col='sil_id')
         assert (self.test_id)
-
 
     def read_last_row(self, target_table: str, pk_col_name: str) -> tuple:
         """
@@ -85,7 +98,7 @@ class BattDbTestHelper(Loader):
         pk_id : int
             The primary key id for the newly inserted row. Returns None if issue with inserting rows.
         """
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = sql.SQL("""
             SELECT 
                 * 
@@ -101,7 +114,6 @@ class BattDbTestHelper(Loader):
             last_row = cursor.fetchone()
 
         return last_row
-
 
     def load_df_to_db(self, df: pd.DataFrame, target_table: str) -> int:
         """
@@ -120,7 +132,7 @@ class BattDbTestHelper(Loader):
         num_rows_inserted : int
             The number of rows inserted into the target_table.
         """
-        return self._Loader__load_dataframe(df, target_table)
+        return self._load_dataframe(df, target_table)
 
     def delete_test_db_entries(self):
         '''
@@ -140,7 +152,10 @@ class BattDbTestHelper(Loader):
             'cyclers_meta', 'cycler_type_id', self.cycler_type_id)
         self.delete_entry(
             'schedule_meta', 'schedule_id', self.schedule_id)
-
+        self.delete_entry(
+            'projects', 'project_id', self.project_id)
+        self.delete_entry(
+            'customers', 'customer_id', self.customer_id)
 
     def delete_entry(self, target_table, pk_col_name, pk_id):
         '''
@@ -155,7 +170,7 @@ class BattDbTestHelper(Loader):
         pk : int
             The primary key id number. E.g 1
         '''
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = sql.SQL("""
                 DELETE FROM 
                     {table_name}
@@ -173,12 +188,12 @@ class BattDbTestHelper(Loader):
         Deletes all data from from data tables
         '''
         data_to_delete_info = [
-            ('test_data','test_id',self.test_id),
-            ('test_data_cycle_stats','test_id',self.test_id),
-            ('sil_data','sil_id',self.sil_id),
+            ('test_data', 'test_id', self.test_id),
+            ('test_data_cycle_stats', 'test_id', self.test_id),
+            ('sil_data', 'sil_id', self.sil_id),
         ]
         for data_info in data_to_delete_info:
-            self.delete_entry(data_info[0],data_info[1],data_info[2])
+            self.delete_entry(data_info[0], data_info[1], data_info[2])
 
     def generate_random_string(self, len=20) -> str:
         '''

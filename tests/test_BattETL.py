@@ -74,7 +74,7 @@ class TestBattetl:
 
         # First row of transformed data
         row = Values.cell.test_data.iloc[0]
-        assert row.equals(data_row.maccor.test_data)
+        assert row.equals(data_row.maccor.test_data_harmonized)
 
     def test_transformed_cycle_stats(self, data_column, data_row):
         # Maccor cycle stats columns
@@ -84,7 +84,7 @@ class TestBattetl:
 
         # First row of transformed data
         row = Values.cell.cycle_stats.iloc[0]
-        assert row.equals(data_row.maccor.cycle_stats)
+        assert row.equals(data_row.maccor.cycle_stats_calced)
 
     def test_load(self):
         Values.cell.load()
@@ -111,7 +111,7 @@ class TestBattetl:
         # Check that the maccor_charge_thermocouple_max_c is the same as the last row of the cycle_stats table
         assert 'maccor_charge_thermocouple_max_c' in db_last_row_cycle_stats[-1], \
             'cycle_stats other_details should have maccor_charge_thermocouple_max_c'
-        
+
         # Check that the datasheet is load correctly
         with open(Values.cell.config['meta_data']['cell_meta']['datasheet'], 'rb') as f:
             datasheet_data = f.read()

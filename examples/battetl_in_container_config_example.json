@@ -1,0 +1,42 @@
+{
+    "timezone": "America/Los_Angeles",
+    "data_file_path": [
+        "/tmp/data/maccor/maccor_cycler_data/simple_data/BG_Maccor_Testdata - 079.txt"
+    ],
+    "stats_file_path": [
+        "/tmp/data/maccor/maccor_cycler_data/simple_data/BG_Maccor_TestData - 079 [STATS].txt"
+    ],
+    "schedule_file_path": [
+        "/tmp/data/maccor/maccor_cycler_data/simple_data/BG_Maccor_Schedule.000"
+    ],
+    "meta_data": {
+        "test_meta": {
+            "test_name": "test_test",
+            "channel": 10
+        },
+        "cell": {
+            "manufacturer_sn": "0001"
+        },
+        "cell_meta": {
+            "manufacturer": "FakeMN",
+            "manufacturer_pn": "1234"
+        },
+        "schedule_meta": {
+            "schedule_name": "fake_schedule.000",
+            "cycler_make": "BattGenie"
+        },
+        "cycler": {
+            "sn": "0001"
+        },
+        "cycler_meta": {
+            "manufacturer": "BattGenie",
+            "model": "Cycler9000"
+        },
+        "customers": {
+            "customer_name": "FakeCustomer"
+        },
+        "projects": {
+            "project_name": "FakeProject"
+        }
+    }
+}

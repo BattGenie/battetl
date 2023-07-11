@@ -14,6 +14,7 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
   - [Requirements](#requirements)
   - [Installation Instructions](#installation-instructions)
 - [Usage](#usage)
+  - [Quick Mode](#quick-mode)
   - [Config File](#config-file)
   - [Env File](#env-file)
   - [Data Export Requirements](#data-export-requirements)
@@ -114,6 +115,16 @@ For a practical implementation of `BattETL`, please refer to the example noteboo
 
 > Note that repeated calls to load test data that already exists in the database (as determined by unix timestamp) will not overwrite any existing data. Only test data after the most recent existing unix timestamp will be loaded. In the case of loading cycle statistics, any duplicate cycles that already exist in the database will be overwritten.
 
+### Quick Mode
+
+BattETL provides a Quick Mode, which automatically detects whether the given file is test data or test stats from a Maccor or an Arbin cycler, and uploads it to the database accordingly. Here's an example command line:
+
+```bash
+python -m battetl.battetl_quick file="TEST_DATA.txt" db_url="postgres://postgres:password@localhost:5454/battdb_quick"
+```
+
+This command relies on [BattDB](https://github.com/BattGenie/BattDB). If BattDB does not exist, a database will be created using Docker Compose and the data will be uploaded to it. The command also returns a harmonized Pandas dataframe that can be used for analysis and visualization. 
+
 ### Config File
 
 To use BattETL it is necessary to provide a path to JSON configuration file. This config file contains paths to the relevant test data files and test metadata used for analysis and establishing database relations. An example configuration file is given within `examples/battetl_config_example.json`
@@ -152,16 +163,34 @@ To use BattETL it is necessary to provide a path to JSON configuration file. Thi
         "cycler_meta": {
             "manufacturer": "BattGenie",
             "model": "Cycler9000"
+        },
+        "customers": {
+            "customer_name": "FakeCustomer"
+        },
+        "projects": {
+            "project_name": "FakeProject"
         }
     }
 }
 ```
 
+#### Cell Thermocouple (optional)
+
+If the cell has a thermocouple, it is necessary to include the following in the header of the config file:
+
+```json
+"cell_thermocouple": 1
+```
+
+where `1` corresponds to the thermocouple index in the cycler test data export, i.e `Temp 1` for Maccor and `Aux_Temperature_1 (C)` for Arbin.
+
+If no cell thermocouple value is listed, `calculated_max_charge_temp_c` and `calculated_max_discharge_temp_c` will be set to `null` in the `test_data_cycle_stats` table.
+
 ### Env File
 
 The .env contains the associated database credentials and is formatted as follows
 
-```
+```text
 ENV=dev # dev, prod
 DB_TARGET=YOUR_DATABASE_NAME
 DB_USERNAME=YOUR_USERNAME

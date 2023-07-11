@@ -63,6 +63,7 @@ class Transformer:
 
         df = data.copy()
         df = Utils.drop_unnamed_columns(df)
+        df = Utils.drop_empty_rows(df)
 
         cycleMake, dataType = Utils.get_cycle_make(df.columns)
         logger.info(f'Cycle make: {cycleMake}. Data type: {dataType}')
@@ -73,6 +74,8 @@ class Transformer:
         if cycleMake == Constants.MAKE_MACCOR and dataType == Constants.DATA_TYPE_TEST_DATA:
             df = self.__transform_maccor_test_data(df)
 
+        df = self.__consolidate_temps(df)
+
         # Apply user defined transformation
         if self.user_transform_test_data:
             df = self.user_transform_test_data(df)
@@ -80,7 +83,7 @@ class Transformer:
         self.test_data = df
         return df
 
-    def transform_cycle_stats(self, data: pd.DataFrame):
+    def transform_cycle_stats(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Transforms cycle stats to conform to BattETL naming and data conventions
 
@@ -98,6 +101,7 @@ class Transformer:
 
         df = data.copy()
         df = Utils.drop_unnamed_columns(df)
+        df = Utils.drop_empty_rows(df)
 
         cycleMake, dataType = Utils.get_cycle_make(df.columns)
         logger.info(f'cycle make: {cycleMake}, data type: {dataType}')
@@ -285,6 +289,13 @@ class Transformer:
             logger.info('Convert column `step` to uint8')
             df['step'] = df['step'].astype('uint8')
 
+        # convert temperature columns to float
+        temperature_columns = df.columns[
+            df.columns.str.contains('thermocouple_')]
+        if len(temperature_columns) > 0:
+            logger.info('Convert temperature columns to float')
+            for column in temperature_columns:
+                df[column] = df[column].apply(Utils.convert_to_float)
         return df
 
     def __harmonize_capacity(self, df: pd.DataFrame, steps: dict) -> pd.DataFrame:
@@ -341,7 +352,7 @@ class Transformer:
 
         return df
 
-    def calc_cycle_stats(self, steps: dict, cv_voltage_thresh_mv: float):
+    def calc_cycle_stats(self, steps: dict, cv_voltage_threshold_mv: float = None, cell_thermocouple: int = None) -> pd.DataFrame:
         """
         Calculates various charge and discharge statistics at the cycle level. Note this function 
         can only be run after self.test_data exists
@@ -353,26 +364,28 @@ class Transformer:
             rest (key->'rst') steps.
         cv_voltage_thresh_mv : float
             The the voltage threshold in milli-volts above which charge is considered to be constant voltage.
+        cell_thermocouple : int
+            The number (as listed in the db column) of the thermocouple  that's attached to the cell.
 
         Returns
         -------
-        stats : dict
-            A dictionary containing various charge and discharge stats.
+        self.cycle_stats : pd.DataFrame
+            The calculated cycle statistics for all cycles.
         """
-        logger.debug(
-            f'Calculating cycle statistics with cv_voltage_thresh_mv: {cv_voltage_thresh_mv}')
-
         if self.test_data.empty:
             logger.error("Cannot run `calc_cycle_stats()` without test_data!")
-            return {}
+            return self.cycle_stats
 
         self.test_data = self.__harmonize_capacity(self.test_data, steps)
 
         # DataFrame where we will hold calculated cycle statistics for all cycles
         df_calced_stats = pd.DataFrame(columns=['cycle'])
 
-        for cycle in range(self.test_data.cycle.head(1).item(), self.test_data.cycle.tail(1).item()+1):
+        cycle_list = self.test_data['cycle'].unique()
+        logger.info(
+            f'Calculating cycle statistics for {len(cycle_list)} cycles')
 
+        for cycle in cycle_list:
             cycle_data = self.test_data[self.test_data.cycle == cycle]
             if cycle_data.empty:
                 logger.info("No cycle data for cycle " + str(cycle))
@@ -382,11 +395,11 @@ class Transformer:
             stats = {'cycle': cycle}
 
             charge_metrics = self.__calc_charge_stats(
-                cycle_data, steps['chg'], cv_voltage_thresh_mv)
+                cycle_data, steps['chg'], cv_voltage_threshold_mv, cell_thermocouple)
             stats.update(charge_metrics)
 
             discharge_metrics = self.__calc_discharge_stats(
-                cycle_data, steps['dsg'])
+                cycle_data, steps['dsg'], cell_thermocouple)
             stats.update(discharge_metrics)
 
             # Calculate coulombic efficiency from the charge and discharge stats.
@@ -399,7 +412,7 @@ class Transformer:
             else:
                 ce = (discharge_metrics['calculated_discharge_capacity_mah']
                       / charge_metrics['calculated_charge_capacity_mah'])
-            stats.update({'coulombic_efficiency': ce})
+            stats.update({'calculated_coulombic_efficiency': ce})
 
             # Append the cycle statistics from this cycle to our cumulative DataFrame for all cycles.
             df_calced_stats = pd.concat(
@@ -413,18 +426,20 @@ class Transformer:
 
         return self.cycle_stats
 
-    def __calc_charge_stats(self, cycle_data: pd.DataFrame, charge_steps: list, cv_voltage_thresh_mv: float) -> dict:
+    def __calc_charge_stats(self, cycle_data: pd.DataFrame, charge_steps: list, cv_voltage_threshold_mv: float = None, cell_thermocouple: int = None) -> dict:
         """
         Calculates various charge stats for a single cycle of data.
 
         Parameters
         ----------
         cycle_data : pd.DataFrame
-            A dataframe containing data for single battery cycle.
+            A DataFrame containing data for single battery cycle.
         charge_steps : list
             List of charge steps from the cycler schedule.
         cv_voltage_thresh_mv : float
             The the voltage threshold in milli-volts above which charge is considered to be constant voltage.
+        cell_thermocouple : int
+            The number (as listed in the db column) of the thermocouple  that's attached to the cell.
 
         Returns
         -------
@@ -432,7 +447,13 @@ class Transformer:
             A dictionary containing various charge stats.
         """
         logger.debug(
-            f'Calculating charge statistics with cv_voltage_thresh_mv: {cv_voltage_thresh_mv}')
+            f'Calculating charge statistics for cycle {cycle_data.cycle.iloc[0]} \
+                with {len(cycle_data)} rows and {len(charge_steps)} charge steps.')
+
+        if cv_voltage_threshold_mv:
+            logger.debug(
+                f'Using CV voltage threshold of {cv_voltage_threshold_mv} mV.')
+
         stats = {}
 
         # Define charge data to be where the step is a charge step.
@@ -443,7 +464,7 @@ class Transformer:
             return stats
 
         ez_df = self.__ez_calc_df(
-            chg_data, charge_steps, 'charge', cv_voltage_thresh_mv)
+            chg_data, charge_steps, 'charge', cv_voltage_threshold_mv)
 
         stats['calculated_charge_capacity_mah'] = ez_df['charge_capacity_mah'].iloc[-1]
         stats['calculated_charge_energy_mwh'] = ez_df['charge_energy_mwh'].iloc[-1]
@@ -471,25 +492,40 @@ class Transformer:
         stats['calculated_fifty_percent_charge_time_s'] = half_percent_cap_time_s
         stats['calculated_eighty_percent_charge_time_s'] = eighty_percent_cap_time_s
 
+        if cell_thermocouple:
+            logger.debug(
+                f'Using cell thermocouple {cell_thermocouple} to calculate max charge temp.')
+            thermocouple_col = f"thermocouple_{cell_thermocouple}_c"
+            try:
+                stats['calculated_max_charge_temp_c'] = chg_data.loc[:,
+                                                                     thermocouple_col].max()
+            except:
+                logger.warning(
+                    'cell_thermocouple value supplied, but not found in test_data.')
+
         return stats
 
-    def __calc_discharge_stats(self, cycle_data: pd.DataFrame, discharge_steps: list) -> dict:
+    def __calc_discharge_stats(self, cycle_data: pd.DataFrame, discharge_steps: list, cell_thermocouple: int = None) -> dict:
         """
         Calculates various discharge stats for a single cycle of data.
 
         Parameters
         ----------
         cycle_data : pd.DataFrame
-            A dataframe containing data for single battery cycle.
+            A DataFrame containing data for single battery cycle.
         discharge_steps : list
             List of discharge steps from the cycler schedule.
+        cell_thermocouple : int
+            The number (as listed in the db column) of the thermocouple  that's attached to the cell.
 
         Returns
         -------
         stats : dict
             A dictionary containing various discharge stats.
         """
-        logger.debug('Calculating discharge statistics')
+        logger.debug(
+            f'Calculating discharge statistics for cycle {cycle_data.cycle.iloc[0]} \
+                with {len(cycle_data)} rows and {len(discharge_steps)} discharge steps')
         stats = {}
 
         # Define discharge data to be where the step is a discharge step.
@@ -505,13 +541,23 @@ class Transformer:
         stats['calculated_discharge_energy_mwh'] = ez_df['discharge_energy_mwh'].iloc[-1]
         stats['calculated_discharge_time_s'] = ez_df['ellapsed_time_s'].iloc[-1]
 
+        if cell_thermocouple:
+            logger.debug(
+                f'Using cell thermocouple {cell_thermocouple} to calculate max discharge temp.')
+            thermocouple_col = f"thermocouple_{cell_thermocouple}_c"
+            try:
+                stats['calculated_max_discharge_temp_c'] = dsg_data.loc[:,
+                                                                        thermocouple_col].max()
+            except:
+                logger.warning(
+                    'cell_thermocouple value supplied, but not found in test_data.')
         return stats
 
-    def __ez_calc_df(self, cycle_df: pd.DataFrame, steps: list, step_type: str, cv_voltage_thresh_mv=None) -> tuple:
+    def __ez_calc_df(self, cycle_df: pd.DataFrame, steps: list, step_type: str, cv_voltage_thresh_mv: float = None) -> pd.DataFrame:
         """
         Creates a DataFrame we can easily use to calculate cycle statistics.
 
-        Modifies test_data to cummulative capacity in cases where capacity is reset at each step.
+        Modifies test_data to cumulative capacity in cases where capacity is reset at each step.
 
         Parameters
         ----------
@@ -527,10 +573,12 @@ class Transformer:
         Returns
         -------
         ez_df: pd.DataFrame
-            Dataframe containing values filtered to charge steps with cumulative capacity
+            DataFrame containing values filtered to charge steps with cumulative capacity
             and ellapsed time calculated.
         """
-        logger.debug(f'Calculating cumulative {step_type} capacity')
+        logger.debug(
+            f'Calculating cumulative capacity with {len(cycle_df)} rows, \
+                  {len(steps)} {step_type} steps and cv_voltage_thresh_mv: {cv_voltage_thresh_mv}')
 
         time_col = 'ellapsed_time_s'
         volt_col = 'voltage_mv'
@@ -552,8 +600,7 @@ class Transformer:
             columns=[time_col, volt_col, cap_col, eng_col, cc_time, cv_time, cc_cap, cv_cap])
 
         # Iterate through each charge step to calculate cumulative capacity
-
-        for i, step in enumerate(steps):
+        for _, step in enumerate(steps):
 
             step_slice = cycle_df[cycle_df.step == step]
             step_df = pd.DataFrame(
@@ -570,7 +617,7 @@ class Transformer:
                     step_slice[eng_col].iloc[0]
                 ez_df[cap_col] = step_slice[cap_col] - \
                     step_slice[cap_col].iloc[0]
-                if step_type == 'charge':
+                if step_type == 'charge' and cv_voltage_thresh_mv is not None:
                     # if ez_df is empty, we're at beginning of a cycle and cap/step time should be reset to zero
                     # TODO: add documentation for this
                     delta_time = step_slice['step_time_s'] - \
@@ -592,10 +639,16 @@ class Transformer:
                 # This catches if capacity was reset after each step. Modifies test_data DF in place.
                 if step_slice[cap_col].iloc[0] < ez_df[cap_col].iloc[-1]:
                     current_cycle = cycle_df.cycle.iloc[0]
-                    self.test_data.loc[self.test_data.cycle == current_cycle,
-                                       self.test_data.step == step, cap_col] += ez_df[cap_col]
-                    self.test_data.loc[self.test_data.cycle == current_cycle,
-                                       self.test_data.step == step, eng_col] += ez_df[eng_col]
+                    self.test_data.loc[
+                        (self.test_data.cycle == current_cycle) &
+                        (self.test_data.step == step),
+                        cap_col] += ez_df[cap_col]
+                    self.test_data.loc[
+                        (self.test_data.cycle == current_cycle) &
+                        (self.test_data.step == step),
+                        eng_col] += ez_df[eng_col]
+                    step_slice[cap_col] += ez_df[cap_col].iloc[-1]
+                    step_slice[eng_col] += ez_df[eng_col].iloc[-1]
                 if not ez_df.empty:
                     # keeps running time across steps. ignoring time between steps
                     step_df[time_col] = (
@@ -604,7 +657,7 @@ class Transformer:
                 step_df[volt_col] = step_slice[volt_col]
                 step_df[cap_col] = step_slice[cap_col]
                 step_df[eng_col] = step_slice[eng_col]
-                if step_type == 'charge':
+                if step_type == 'charge' and cv_voltage_thresh_mv is not None:
                     # calculate the delta time/cap for each step, sum the deltas in calc_stats() to get cycle time/cap
                     delta_time = step_slice['step_time_s'] - \
                         step_slice['step_time_s'].shift(1, fill_value=0)
@@ -621,5 +674,26 @@ class Transformer:
                 elif step_type == 'discharge':
                     step_df[[cc_time, cc_cap, cv_time, cv_cap]] = np.nan
                 ez_df = pd.concat([ez_df, step_df])
-        logger.debug(f'Finished calculating cumulative {step_type} capacity')
         return ez_df
+
+    def __consolidate_temps(self, df):
+        '''
+        Adds thermocouple readings from each data point to an array containing all thermocouple readings.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            DataFrame containing test data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing test data with thermocouple readings in an array.
+        '''
+        thermocouple_cols = [
+            col for col in df.columns if re.search('thermocouple_\d+_c', col)]
+
+        df['thermocouple_temps_c'] = df.apply(
+            lambda row: [row[col] for col in thermocouple_cols], axis=1)
+
+        return df
