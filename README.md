@@ -167,12 +167,13 @@ To use BattETL it is necessary to provide a path to JSON configuration file. Thi
         "customers": {
             "customer_name": "FakeCustomer"
         },
-            "projects": {
+        "projects": {
             "project_name": "FakeProject"
         }
     }
 }
 ```
+
 #### Cell Thermocouple (optional)
 
 If the cell has a thermocouple, it is necessary to include the following in the header of the config file:
@@ -189,7 +190,7 @@ If no cell thermocouple value is listed, `calculated_max_charge_temp_c` and `cal
 
 The .env contains the associated database credentials and is formatted as follows
 
-```
+```text
 ENV=dev # dev, prod
 DB_TARGET=YOUR_DATABASE_NAME
 DB_USERNAME=YOUR_USERNAME
