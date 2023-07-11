@@ -52,7 +52,13 @@ def cell_config():
             "cycler_meta": {
                 "manufacturer": "BattGenie",
                 "model": "Cycler9000"
-            }
+            },
+            "customers": {
+                "customer_name": "FakeCustomer"
+            },
+            "projects": {
+                "project_name": "FakeProject"
+            },
         }
     }
     return data
@@ -192,6 +198,29 @@ def data_row():
                 'dcir': 0.0,
                 'thermocouple_1_c': 26.55,
                 'unixtime_s': 1585288814,
+                'thermocouple_temps_c': [26.55]
+            }]).iloc[0]
+
+            test_data_harmonized = pd.DataFrame([{
+                'cycle': 0,
+                'step': 1,
+                'test_time_s': 0.0,
+                'step_time_s': 0.0,
+                'maccor_capacity_mah': 0.0,
+                'maccor_energy_mwh': 0.0,
+                'current_ma': 0.0,
+                'voltage_mv': 4160.3,
+                'es': 0,
+                'recorded_datetime': pd.Timestamp('2020-03-27 06:00:14+00:00', tz='America/Los_Angeles').tz_convert('UTC'),
+                'acr': 0.0,
+                'dcir': 0.0,
+                'thermocouple_1_c': 26.55,
+                'unixtime_s': 1585288814,
+                'thermocouple_temps_c': [26.55],
+                'charge_capacity_mah': np.nan,
+                'discharge_capacity_mah': np.nan,
+                'charge_energy_mwh': np.nan,
+                'discharge_energy_mwh': np.nan
             }]).iloc[0]
 
             test_data_type2 = pd.DataFrame([{
@@ -209,6 +238,7 @@ def data_row():
                 'es': 0,
                 'recorded_datetime': pd.Timestamp('2023-03-25 18:03:38+00:00', tz='America/Los_Angeles').tz_convert('UTC'),
                 'unixtime_s': 1679767418,
+                'thermocouple_temps_c': []
             }]).iloc[0]
 
             cycle_stats = pd.DataFrame([{
@@ -231,7 +261,43 @@ def data_row():
                 'maccor_discharge_thermocouple_end_c': np.nan,
                 'maccor_discharge_thermocouple_min_c': np.nan,
                 'maccor_discharge_thermocouple_max_c': np.nan,
+                'date': 43916.9647483565
+            }]).iloc[0]
+
+            cycle_stats_calced = pd.DataFrame([{
+                'cycle': 0.0,
+                'cycle type': np.nan,
+                'test_time_s': 539.16,
+                'maccor_min_current_ma': 0.099794003204,
+                'maccor_min_voltage_mv': 4.200122072175,
+                'reported_charge_capacity_mah': 36.577804451999995,
+                'reported_discharge_capacity_mah': np.nan,
+                'reported_charge_energy_mwh': 153.244853203,
+                'reported_discharge_energy_mwh': np.nan,
+                'acr_ohm': 0.0,
+                'dcir': 0.0,
+                'maccor_charge_thermocouple_start_c': 26.537836074829,
+                'maccor_charge_thermocouple_end_c': 26.621141433716,
+                'maccor_charge_thermocouple_min_c': 26.537836074829,
+                'maccor_charge_thermocouple_max_c': 26.65446472168,
+                'maccor_discharge_thermocouple_start_c': np.nan,
+                'maccor_discharge_thermocouple_end_c': np.nan,
+                'maccor_discharge_thermocouple_min_c': np.nan,
+                'maccor_discharge_thermocouple_max_c': np.nan,
                 'date': 43916.9647483565,
+                'calculated_charge_capacity_mah': 36.58,
+                'calculated_charge_energy_mwh': 150,
+                'calculated_charge_time_s': 534.15,
+                'calculated_cc_charge_time_s': 0,
+                'calculated_cv_charge_time_s': 0,
+                'calculated_cc_capacity_mah': 0,
+                'calculated_cv_capacity_mah': 0,
+                'calculated_fifty_percent_charge_time_s': 220,
+                'calculated_eighty_percent_charge_time_s': 360,
+                'calculated_coulombic_efficiency': np.nan,
+                'calculated_discharge_capacity_mah': np.nan,
+                'calculated_discharge_energy_mwh': np.nan,
+                'calculated_discharge_time_s': np.nan
             }]).iloc[0]
 
         class arbin:
@@ -259,7 +325,39 @@ def data_row():
                 'thermocouple_2_c': 24.64854,
                 'aux_dt/dt_2 (c/s)': -0.002137546,
                 'unixtime_s': 1653248590,
+                'thermocouple_temps_c': [24.25, 24.64854]
             }]).iloc[0]
+
+            test_data_harmonized = pd.DataFrame([{
+                'data_point': 1,
+                'recorded_datetime': pd.Timestamp('2022-05-22 12:43:10.717000-07:00', tz='America/Los_Angeles').tz_convert('UTC'),
+                'test_time_s': 5.0021,
+                'step_time_s': 5.0021,
+                'cycle': 1,
+                'step': 1,
+                'current_ma': 0.0,
+                'voltage_mv': 3373.0280000000002,
+                'power_mw': 0.0,
+                'arbin_charge_capacity_mah': 0.0,
+                'arbin_discharge_capacity_mah': 0.0,
+                'arbin_charge_energy_mwh': 0.0,
+                'arbin_discharge_energy_mwh': 0.0,
+                'acr (ohm)': np.nan,
+                'dv/dt (v/s)': np.nan,
+                'impedance_mohm': np.nan,
+                'dq/dv (ah/v)': np.nan,
+                'dv/dq (v/ah)': np.nan,
+                'thermocouple_1_c': 24.25,
+                'aux_dt/dt_1 (c/s)': 0.0,
+                'thermocouple_2_c': 24.64854,
+                'aux_dt/dt_2 (c/s)': -0.002137546,
+                'unixtime_s': 1653248590,
+                'charge_capacity_mah': np.nan,
+                'discharge_capacity_mah': np.nan,
+                'charge_energy_mwh': np.nan,
+                'discharge_energy_mwh': np.nan
+            }]).iloc[0]
+
             cycle_stats = pd.DataFrame([{
                 'recorded_datetime': '\t05/22/2022 14:06:34.312',
                 'test_time_s': 5008.5971,

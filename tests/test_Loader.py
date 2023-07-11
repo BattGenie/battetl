@@ -70,14 +70,14 @@ def test_lookup_cell_id():
 
     # Lookup existing cell id
     loader = Loader(config)
-    cell_id = loader._Loader__lookup_cell_id()
+    cell_id = loader._lookup_cell_id()
     assert (cell_id == Values.TEST_HELPER.cell_id)
     del loader
 
     # Lookup non-existent cell_id
     config['meta_data']['cell']['manufacturer_sn'] = Values.TEST_HELPER.generate_random_string()
     loader = Loader(config)
-    cell_id = loader._Loader__lookup_cell_id()
+    cell_id = loader._lookup_cell_id()
     assert (cell_id is None)
 
 
@@ -129,14 +129,14 @@ def test_lookup_cycler_id():
 
     # Lookup existing cycler id
     loader = Loader(config)
-    cycler_id = loader._Loader__lookup_cycler_id()
+    cycler_id = loader._lookup_cycler_id()
     assert (cycler_id == Values.TEST_HELPER.cycler_id)
     del loader
 
     # Lookup non-existing cycler with existing cycler_type_id
     config['meta_data']['cycler']['sn'] = Values.TEST_HELPER.generate_random_string()
     loader = Loader(config)
-    cycler_id = loader._Loader__lookup_cycler_id()
+    cycler_id = loader._lookup_cycler_id()
     assert (cycler_id is None)
     del loader
 
@@ -149,14 +149,14 @@ def test_lookup_test_id():
 
     # Lookup existing test id
     loader = Loader(config)
-    test_id = loader._Loader__lookup_test_id()
+    test_id = loader._lookup_test_id()
     assert (test_id == Values.TEST_HELPER.test_id)
     del loader
 
     # Lookup non-existent test.
     config['meta_data']['test_meta']['test_name'] = Values.TEST_HELPER.generate_random_string()
     loader = Loader(config)
-    test_id = loader._Loader__lookup_test_id()
+    test_id = loader._lookup_test_id()
     assert (test_id is None)
     del loader
 
@@ -206,6 +206,46 @@ def test_lookup_latest_unixtime():
     loader = Loader(config)
     latest_unixtime_s = loader._Loader__lookup_latest_unixtime()
     assert (latest_unixtime_s is None)
+
+
+@pytest.mark.database
+@pytest.mark.load
+def test_lookup_customer_id():
+
+    config = deepcopy(Values.CONFIG_1)
+
+    # Lookup existing customer id
+    loader = Loader(config)
+    customer_id = loader._Loader__lookup_customer_id()
+    assert (customer_id == Values.TEST_HELPER.customer_id)
+    del loader
+
+    # Lookup non-existent customer.
+    config['meta_data']['customers']['customer_name'] = Values.TEST_HELPER.generate_random_string()
+    loader = Loader(config)
+    customer_id = loader._Loader__lookup_customer_id()
+    assert (customer_id is None)
+    del loader
+
+
+@pytest.mark.database
+@pytest.mark.load
+def test_lookup_project_id():
+
+    config = deepcopy(Values.CONFIG_1)
+
+    # Lookup existing project id
+    loader = Loader(config)
+    project_id = loader._Loader__lookup_project_id()
+    assert (project_id == Values.TEST_HELPER.project_id)
+    del loader
+
+    # Lookup non-existent project.
+    config['meta_data']['projects']['project_name'] = Values.TEST_HELPER.generate_random_string()
+    loader = Loader(config)
+    project_id = loader._Loader__lookup_project_id()
+    assert (project_id is None)
+    del loader
 
 
 @pytest.mark.database
@@ -453,7 +493,7 @@ def test_insert_cycler():
     loader = Loader(config)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id)
-    cycler_id = loader._Loader__insert_cycler()
+    cycler_id = loader._insert_cycler()
     assert (cycler_id)
 
     # Make sure loaded data matches what is in config.
@@ -477,7 +517,7 @@ def test_insert_cycler():
     loader = Loader(config)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id is None)
-    cycler_id = loader._Loader__insert_cycler()
+    cycler_id = loader._insert_cycler()
     assert (cycler_id)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id)
@@ -619,11 +659,11 @@ def test_insert_test_meta():
     # Test inserting a test with a cell, schedule, and cycler that already exist
     config['meta_data']['test_meta']['test_name'] = Values.TEST_HELPER.generate_random_string()
     loader = Loader(config)
-    cell_id = loader._Loader__lookup_cell_id()
+    cell_id = loader._lookup_cell_id()
     assert (cell_id)
     schedule_id = loader._Loader__lookup_schedule_id()
     assert (schedule_id)
-    cycler_id = loader._Loader__lookup_cycler_id()
+    cycler_id = loader._lookup_cycler_id()
     assert (cycler_id)
     test_id = loader._Loader__insert_test_meta()
     assert (test_id)
@@ -658,10 +698,10 @@ def test_insert_test_meta():
     loader = Loader(config)
 
     # Make sure no fields existed before.
-    assert (loader._Loader__lookup_cell_id() is None)
+    assert (loader._lookup_cell_id() is None)
     assert (loader._Loader__lookup_cell_type_id() is None)
     assert (loader._Loader__lookup_schedule_id() is None)
-    assert (loader._Loader__lookup_cycler_id() is None)
+    assert (loader._lookup_cycler_id() is None)
     assert (loader._Loader__lookup_cycler_type_id() is None)
 
     # Insert new test data
@@ -671,11 +711,11 @@ def test_insert_test_meta():
     # Get the IDs for the newly inserted data
     schedule_id = loader._Loader__lookup_schedule_id()
     assert (schedule_id)
-    cycler_id = loader._Loader__lookup_cycler_id()
+    cycler_id = loader._lookup_cycler_id()
     assert (cycler_id)
     cycler_type_id = loader._Loader__lookup_cycler_type_id()
     assert (cycler_type_id)
-    cell_id = loader._Loader__lookup_cell_id()
+    cell_id = loader._lookup_cell_id()
     assert (cell_id)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id)

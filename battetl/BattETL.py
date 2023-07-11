@@ -95,12 +95,15 @@ class BattETL:
                 extractor.schedule_from_files(
                     self.config['schedule_file_path'])
                 self.schedule = extractor.schedule
-                self.config['meta_data']['schedule_meta']['details'] = json.dumps(extractor.schedule)
+                self.config['meta_data']['schedule_meta']['details'] = json.dumps(
+                    extractor.schedule)
             except Exception as e:
                 logger.error('Failed to extract schedule', exc_info=True)
                 logger.error(e)
         else:
             logger.warning('No schedule file path')
+
+        logger.info('Finished extracting data')
 
         return self
 
@@ -138,17 +141,24 @@ class BattETL:
         else:
             logger.warning('No cycle stats to transform.')
 
-        if self.schedule and 'cv_voltage_threshold_mv' in self.config['meta_data']['schedule_meta']:
+        if not self.test_data.empty and self.schedule:
             try:
+                cv_voltage_threshold_mv = self.config['meta_data']['schedule_meta'].get(
+                    'cv_voltage_threshold_mv')
+                cell_thermocouple = self.config.get('cell_thermocouple')
+
                 transformer.calc_cycle_stats(
                     self.schedule['steps'],
-                    self.config['meta_data']['schedule_meta']['cv_voltage_threshold_mv'])
+                    cv_voltage_threshold_mv=cv_voltage_threshold_mv,
+                    cell_thermocouple=cell_thermocouple)
                 self.cycle_stats = transformer.cycle_stats
             except Exception as e:
                 logger.error('Failed to calculate cycle stats', exc_info=True)
                 logger.error(e)
         else:
             logger.warning('Skipping cycle stats calculation.')
+
+        logger.info('Finished transforming data')
 
         return self
 
@@ -185,5 +195,7 @@ class BattETL:
             logger.warning('No cycle stats to load.')
 
         del loader
+
+        logger.info('Finished loading data')
 
         return self

@@ -32,6 +32,12 @@
         "cycler_meta": {
             "manufacturer": "BattGenie",
             "model": "Cycler9000"
-        }
+        },
+		"customers": {
+			"customer_name": "FakeCustomer"
+		},
+		"projects": {
+			"project_name": "FakeProject"
+		}
     }
 }

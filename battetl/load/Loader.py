@@ -124,6 +124,12 @@ class Loader:
                 Optional('dimensions'): str,
                 Optional('datasheet'): str,  # File path
             },
+            'customers': {
+                'customer_name': str,
+            },
+            'projects': {
+                'project_name': str,
+            }
         })
 
         assert (self.__validate_config(config))
@@ -173,13 +179,13 @@ class Loader:
                             f'Dropping column {column} from DataFrame')
                         df_copy = df_copy.drop([column], axis=1)
 
-                test_id = self.__lookup_test_id()
+                test_id = self._lookup_test_id()
                 if not test_id:
                     test_id = self.__insert_test_meta()
                 df_copy['test_id'] = np.ones(
                     df_copy.shape[0], dtype=np.uint16) * test_id
 
-                num_rows_loaded += self.__load_dataframe(
+                num_rows_loaded += self._load_dataframe(
                     df=df_copy, target_table='test_data')
         except Exception as e:
             logger.error('Error loading test data')
@@ -227,7 +233,7 @@ class Loader:
                 logger.debug(f'Dropping column {column} from DataFrame')
                 df_copy = df_copy.drop([column], axis=1)
 
-        test_id = self.__lookup_test_id()
+        test_id = self._lookup_test_id()
         if not test_id:
             test_id = self.__insert_test_meta()
 
@@ -236,7 +242,7 @@ class Loader:
             df_copy.shape[0], dtype=np.uint16) * test_id
 
         # Get latest cycle_stats_id for the specific test_id
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     cycle_stats_id, cycle
@@ -256,17 +262,17 @@ class Loader:
             result = cursor.fetchall()
         if result:
             duplicate_stats_id_bounds = [result[0][0], result[-1][0]]
-            duplicate_cycle_range = [result[1][0], result[-1][0]]
+            duplicate_cycle_range = [result[0][1], result[-1][1]]
             logger.info(
                 f'Data through cycle {duplicate_cycle_range[-1]} already exists for test_id {test_id}')
 
         # Insert the new cycle stats data.
-        num_rows_inserted = self.__load_dataframe(
+        num_rows_inserted = self._load_dataframe(
             df=df_copy, target_table='test_data_cycle_stats')
 
         # If new data was inserted for cycles that previously existed then delete the old data.
         if num_rows_inserted and result:
-            with self.conn.cursor() as cursor:
+            with self._conn.cursor() as cursor:
                 stmt = psycopg2.sql.SQL("""
                     DELETE FROM 
                         test_data_cycle_stats
@@ -344,7 +350,7 @@ class Loader:
     def __create_connection(self) -> bool:
         """
         Creates connection to the target database specified in the config. 
-        `self.conn` is the psycopg2 use for queries and limited meta insertion.
+        `self._conn` is the psycopg2 use for queries and limited meta insertion.
         `self.engine `is an sqlalchemy Engine instance used by Pandas for data
         frame insertion.
 
@@ -366,8 +372,8 @@ class Loader:
                 port=os.getenv('DB_PORT'),
                 database=os.getenv('DB_TARGET'),
             )
-            self.conn = postgreSQL_pool.getconn()
-            self.conn.autocommit = True
+            self._conn = postgreSQL_pool.getconn()
+            self._conn.autocommit = True
             self.engine = sqlalchemy.create_engine(
                 'postgresql+psycopg2://', creator=postgreSQL_pool.getconn)
             success = True
@@ -419,7 +425,7 @@ class Loader:
 
         return df
 
-    def __lookup_test_id(self) -> int:
+    def _lookup_test_id(self) -> int:
         """
         Looks up the test_id in the target database based on the test_name defined
         within the config. If no entry exists then None is returned.
@@ -429,7 +435,7 @@ class Loader:
         test_id : int
             The test_id from the target database. None if the test_id does not exist
         """
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     test_id
@@ -462,7 +468,7 @@ class Loader:
             The cell_id from the target database. None if the test_id does not exist
         """
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     cell_type_id
@@ -488,7 +494,7 @@ class Loader:
         logger.debug(f'Lookup cell_type_id: {cell_type_id}')
         return cell_type_id
 
-    def __lookup_cell_id(self) -> int:
+    def _lookup_cell_id(self) -> int:
         """
         Looks up the cell_id in the target database based on manufacturer,
         manufacturer_pn, and manufacturer_sn as defined within the config. 
@@ -507,7 +513,7 @@ class Loader:
         if not cell_type_id:
             return None
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     cell_id
@@ -544,7 +550,7 @@ class Loader:
             The schedule_id from the target database. None if the test_id does not exist
         """
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     schedule_id
@@ -577,7 +583,7 @@ class Loader:
             The cycler_type_id from the target database. None if the cycler_type_id does not exist.
         """
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     cycler_type_id
@@ -603,7 +609,7 @@ class Loader:
         logger.debug(f'Lookup cycler_type_id: {cycler_type_id}')
         return cycler_type_id
 
-    def __lookup_cycler_id(self) -> int:
+    def _lookup_cycler_id(self) -> int:
         """
         Looks up the cycler_id in the target database based on manufacturer,
         model, and cycler sn as defined within the config. 
@@ -619,7 +625,7 @@ class Loader:
         if not cycler_type_id:
             return None
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             stmt = psycopg2.sql.SQL("""
                 SELECT
                     cycler_id
@@ -644,6 +650,82 @@ class Loader:
         logger.debug(f'Lookup cycler_id: {cycler_id}')
         return cycler_id
 
+    def __lookup_customer_id(self) -> int:
+        """
+        Looks up the customer_id for the customer name specified in the config.
+
+        If no entry exists then None is returned.
+
+        Returns
+        -------
+        customer_id : str
+            The customer_id for the customer specified in the config.
+        """
+        customer_name = self.config['customers'].get('customer_name')
+
+        if not customer_name:
+            logger.warning('No customer_name specified in config')
+            return None
+
+        with self._conn.cursor() as cursor:
+            stmt = psycopg2.sql.SQL("""
+                SELECT
+                    customer_id
+                FROM
+                    customers
+                WHERE
+                    customer_name = {customer_name}
+            """).format(
+                customer_name=psycopg2.sql.Literal(
+                    customer_name)
+            )
+            cursor.execute(stmt)
+            customer_id = cursor.fetchone()
+
+        if customer_id:
+            customer_id = customer_id[0]
+            logger.info(f'customer_id for {customer_name} is {customer_id}')
+
+        return customer_id
+
+    def __lookup_project_id(self) -> int:
+        """
+        Looks up the project_id for the project name specified in the config.
+
+        If no entry exists then None is returned.
+
+        Returns
+        -------
+        project_id : str
+            The project_id for the project specified in the config.
+        """
+        project_name = self.config['projects'].get('project_name')
+
+        if not project_name:
+            logger.warning('No project_name specified in config')
+            return None
+
+        with self._conn.cursor() as cursor:
+            stmt = psycopg2.sql.SQL("""
+                SELECT
+                    project_id
+                FROM
+                    projects
+                WHERE
+                    project_name = {project_name}
+            """).format(
+                project_name=psycopg2.sql.Literal(
+                    project_name)
+            )
+            cursor.execute(stmt)
+            project_id = cursor.fetchone()
+
+        if project_id:
+            project_id = project_id[0]
+            logger.info(f'project_id for {project_name} is {project_id}')
+
+        return project_id
+
     def __insert_test_meta(self) -> int:
         """
         Inserts a new entry in test_meta table based on info in config.
@@ -654,7 +736,7 @@ class Loader:
             The test_id for the newly inserted test meta. None if insert failed.
         """
 
-        cell_id = self.__lookup_cell_id()
+        cell_id = self._lookup_cell_id()
         if not cell_id:
             logger.info(
                 f'No cell_id exists for {json.dumps(self.config["cell"])}, creating new entry')
@@ -666,19 +748,26 @@ class Loader:
                 f'No schedule_id exists for {json.dumps(self.config["schedule_meta"])}, creating new entry')
             schedule_id = self.__insert_schedule_meta()
 
-        cycler_id = self.__lookup_cycler_id()
+        cycler_id = self._lookup_cycler_id()
         if not cycler_id:
             logger.info(
                 f'No cycler_id exists for {json.dumps(self.config["cycler"])}, creating new entry')
-            cycler_id = self.__insert_cycler()
+            cycler_id = self._insert_cycler()
+
+        project_id = self.__lookup_project_id()
+        if not project_id:
+            logger.info(
+                f'No project_id exists for {json.dumps(self.config["projects"])}, creating new entry')
+            project_id = self.__insert_project()
 
         upload_dict = copy.deepcopy(self.config['test_meta'])
         upload_dict['schedule_id'] = schedule_id
         upload_dict['cycler_id'] = cycler_id
         upload_dict['cell_id'] = cell_id
+        upload_dict['project_id'] = project_id
 
         logger.debug(f'Inserting test_meta: {json.dumps(upload_dict)}')
-        return self.__perform_insert(target_table='test_meta', dict_to_load=upload_dict, pk_id_col='test_id')
+        return self._perform_insert(target_table='test_meta', dict_to_load=upload_dict, pk_id_col='test_id')
 
     def __insert_cell(self) -> int:
         """
@@ -699,7 +788,7 @@ class Loader:
         upload_dict['cell_type_id'] = cell_type_id
 
         logger.debug(f'Inserting cell: {json.dumps(upload_dict)}')
-        return self.__perform_insert(target_table='cells', dict_to_load=upload_dict, pk_id_col='cell_id')
+        return self._perform_insert(target_table='cells', dict_to_load=upload_dict, pk_id_col='cell_id')
 
     def __insert_cell_meta(self) -> int:
         """
@@ -717,16 +806,18 @@ class Loader:
         # Check if 'datasheet' key exists in upload_dict and the file exists
         if 'datasheet' in upload_dict:
             if os.path.exists(upload_dict['datasheet']):
-                logger.info(f'Found datasheet file: {upload_dict["datasheet"]}')
+                logger.info(
+                    f'Found datasheet file: {upload_dict["datasheet"]}')
                 # Convert pdf file to binary data
                 with open(upload_dict['datasheet'], 'rb') as f:
                     datasheet_data = f.read()
                 # Add binary data to upload_dict
                 upload_dict['datasheet'] = datasheet_data
             else:
-                logger.error(f'Could not find datasheet file: {upload_dict["datasheet"]}')
+                logger.error(
+                    f'Could not find datasheet file: {upload_dict["datasheet"]}')
 
-        return self.__perform_insert(target_table='cells_meta', dict_to_load=upload_dict, pk_id_col='cell_type_id')
+        return self._perform_insert(target_table='cells_meta', dict_to_load=upload_dict, pk_id_col='cell_type_id')
 
     def __insert_schedule_meta(self) -> int:
         """
@@ -740,9 +831,9 @@ class Loader:
         upload_dict = copy.deepcopy(self.config['schedule_meta'])
 
         logger.debug(f'Inserting schedule_meta: {json.dumps(upload_dict)}')
-        return self.__perform_insert(target_table='schedule_meta', dict_to_load=upload_dict, pk_id_col='schedule_id')
+        return self._perform_insert(target_table='schedule_meta', dict_to_load=upload_dict, pk_id_col='schedule_id')
 
-    def __insert_cycler(self) -> int:
+    def _insert_cycler(self) -> int:
         """
         Inserts a new entry in `cycles` table based on info in config.
 
@@ -761,7 +852,7 @@ class Loader:
         upload_dict['cycler_type_id'] = cycler_type_id
 
         logger.debug(f'Inserting cycler: {json.dumps(upload_dict)}')
-        return self.__perform_insert(target_table='cyclers', dict_to_load=upload_dict, pk_id_col='cycler_id')
+        return self._perform_insert(target_table='cyclers', dict_to_load=upload_dict, pk_id_col='cycler_id')
 
     def __insert_cycler_meta(self) -> int:
         """
@@ -775,9 +866,46 @@ class Loader:
         upload_dict = copy.deepcopy(self.config['cycler_meta'])
 
         logger.debug(f'Inserting cycler_meta: {json.dumps(upload_dict)}')
-        return self.__perform_insert(target_table='cyclers_meta', dict_to_load=upload_dict, pk_id_col='cycler_type_id')
+        return self._perform_insert(target_table='cyclers_meta', dict_to_load=upload_dict, pk_id_col='cycler_type_id')
 
-    def __perform_insert(self, target_table: str, dict_to_load: dict, pk_id_col: str) -> int:
+    def __insert_project(self) -> int:
+        """
+        Inserts a new entry in `projects` table based on info in config. If no
+        customer for the project exists, an entry is created in the `customers`
+        table.
+
+        Returns
+        -------
+        project_id : int
+            The project_id for the newly inserted project. None if the insert failed.
+        """
+        customer_id = self.__lookup_customer_id()
+        if not customer_id:
+            logger.info(
+                f'No customer_id exists for {json.dumps(self.config["customers"])}, creating new entry')
+            customer_id = self.__insert_customer()
+
+        upload_dict = copy.deepcopy(self.config['projects'])
+        upload_dict['customer_id'] = customer_id
+
+        logger.debug(f'Inserting project: {json.dumps(upload_dict)}')
+        return self._perform_insert(target_table='projects', dict_to_load=upload_dict, pk_id_col='project_id')
+
+    def __insert_customer(self) -> int:
+        """
+        Inserts a new entry in `customers` table based on info in config.
+
+        Returns
+        -------
+        customer_id : int
+            The customer_id for the newly inserted customer. None if the insert failed.
+        """
+        upload_dict = copy.deepcopy(self.config['customers'])
+
+        logger.debug(f'Inserting customer: {json.dumps(upload_dict)}')
+        return self._perform_insert(target_table='customers', dict_to_load=upload_dict, pk_id_col='customer_id')
+
+    def _perform_insert(self, target_table: str, dict_to_load: dict, pk_id_col: str) -> int:
         """
         Inserts the values from the dict_to_load into the `target_table`. Assumes
         columns are keys. Drops any empty keys.
@@ -797,7 +925,7 @@ class Loader:
         """
 
         # Remove any empty entries from upload dict
-        dict_to_load = {k: v for k, v in dict_to_load.items() if v}
+        dict_to_load = {k: v for k, v in dict_to_load.items() if v is not None}
         log_dict_to_load = dict(dict_to_load)
         for k, v in log_dict_to_load.items():
             # Convert binary data to string for logging
@@ -817,7 +945,7 @@ class Loader:
                     psycopg2.sql.Placeholder() * len(dict_to_load)),
                 pk_id=psycopg2.sql.Identifier(pk_id_col)
             )
-            with self.conn.cursor() as cursor:
+            with self._conn.cursor() as cursor:
                 cursor.execute(insert_statement, list(dict_to_load.values()))
                 result = cursor.fetchone()
             if result:
@@ -850,14 +978,14 @@ class Loader:
             The latest unixtime_s in the `test_data` table for the test.
         """
 
-        test_id = self.__lookup_test_id()
+        test_id = self._lookup_test_id()
         if not test_id:
             test_name = self.config['test_meta']['test_name']
             logger.info(
                 f'No test data exists for "{test_name}", OK to upload all data.')
             return None
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             cursor.execute("""
                 SELECT
                     MAX(unixtime_s)
@@ -890,13 +1018,13 @@ class Loader:
             The latest cycle uploaded in the database for the test.
         """
 
-        test_id = self.__lookup_test_id()
+        test_id = self._lookup_test_id()
         if not test_id:
             logger.info(
                 f'No test data exists for {test_id}, OK to upload all data.')
             return None
 
-        with self.conn.cursor() as cursor:
+        with self._conn.cursor() as cursor:
             cursor.execute("""
                 SELECT
                     MAX(cycle)
@@ -916,7 +1044,7 @@ class Loader:
 
         return latest_cycle
 
-    def __load_dataframe(self, df: pd.DataFrame, target_table: str) -> int:
+    def _load_dataframe(self, df: pd.DataFrame, target_table: str) -> int:
         """
         Loads the passed data frame to the passed target_table in the database
         specified in the config.
