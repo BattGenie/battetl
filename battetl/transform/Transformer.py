@@ -41,7 +41,7 @@ class Transformer:
         self.test_data = pd.DataFrame(dtype=object)
         self.cycle_stats = pd.DataFrame(dtype=object)
 
-    def transform_test_data(self, data: pd.DataFrame) -> pd.DataFrame:
+    def transform_test_data(self, data: pd.DataFrame, file_meta: dict = None) -> pd.DataFrame:
         """
         Transforms test data to conform to BattETL naming and data conventions
 
@@ -52,8 +52,9 @@ class Transformer:
         schedule_steps : dict
             A dictionary containing lists of charge (key->'chg'), discharge (key->'dsg'), and 
             rest (key->'rst') steps from the schedule used to generate the data. Used to calculate
-            cycle level statistics (e.g. CV charge time.)
-
+            cycle level statistics (e.g. CV charge time.)s
+        file_meta : dict, optional
+            Dictionary containing the user defined column names for the test data. The default is None.
         Returns
         -------
         df : pandas.DataFrame
@@ -68,10 +69,11 @@ class Transformer:
         cycleMake, dataType = Utils.get_cycle_make(df.columns)
         logger.info(f'Cycle make: {cycleMake}. Data type: {dataType}')
 
-        if cycleMake == Constants.MAKE_ARBIN and dataType == Constants.DATA_TYPE_TEST_DATA:
+        if file_meta:
+            df = self.__transform_unstructured_data(df, file_meta)
+        elif cycleMake == Constants.MAKE_ARBIN and dataType == Constants.DATA_TYPE_TEST_DATA:
             df = self.__transform_arbin_test_data(df)
-
-        if cycleMake == Constants.MAKE_MACCOR and dataType == Constants.DATA_TYPE_TEST_DATA:
+        elif cycleMake == Constants.MAKE_MACCOR and dataType == Constants.DATA_TYPE_TEST_DATA:
             df = self.__transform_maccor_test_data(df)
 
         df = self.__consolidate_temps(df)
@@ -117,6 +119,56 @@ class Transformer:
             df = self.user_transform_cycle_stats(df)
 
         self.cycle_stats = df.astype(object)
+        return df
+
+    def __transform_unstructured_data(self, df: pd.DataFrame, file_meta: dict) -> pd.DataFrame:
+        """
+        Transforms unstructured data with file_meta to conform to BattETL naming and data conventions
+        1. Rename columns
+        2. Concert units
+        4. Convert data type
+        5. Sort data
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The input DataFrame
+        file_meta : dict
+            Dictionary containing the meta data for the file.
+        Returns
+        -------
+        df : pandas.DataFrame
+            The transformed output DataFrame
+        """
+        logger.info('Transform unstructured data')
+
+        # Check user defined column names exist
+        if not file_meta.get('voltage_mv'):
+            raise ValueError(
+                f'Voltage column name does not exist: `voltage_mv`')
+        if not file_meta.get('current_ma'):
+            raise ValueError(
+                f'Current column name does not exist: `current_ma`')
+        if not file_meta.get('test_time_s') or file_meta.get('recorded_datetime'):
+            raise ValueError(
+                f'Required to have either `test_time_s` or `recorded_datetime` column!')
+
+        # Remove the `pandas_read_csv_args` dictionary if it is there
+        file_meta.pop("pandas_read_csv_args", None)
+
+        # Rename columns
+        columns_mappings = {}
+        for column in file_meta:
+            columns_mappings[file_meta[column]['column_name']] = column
+        df = Utils.rename_df_columns(df, columnsMapping=columns_mappings)
+
+        # Apply any transformations
+        for column in file_meta:
+            if file_meta.get(column).get('scaling_factor'):
+                df[column] = df[column] * \
+                    file_meta.get(column).get('scaling_factor')
+
+        df = self.__convert_data_type(df)
+
         return df
 
     def __transform_arbin_test_data(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -318,23 +370,8 @@ class Transformer:
         df : pd.DataFrame
             A pandas DataFrame with harmonized capacity/energy values across cyclers.
         """
-
-        if 'maccor_capacity_mah' in df:
-            df['charge_capacity_mah'] = df[df.step.isin(
-                steps['chg'])].maccor_capacity_mah
-            df['discharge_capacity_mah'] = df[df.step.isin(
-                steps['dsg'])].maccor_capacity_mah
-        if 'maccor_energy_mwh' in df:
-            df['charge_energy_mwh'] = df[df.step.isin(
-                steps['chg'])].maccor_energy_mwh
-            df['discharge_energy_mwh'] = df[df.step.isin(
-                steps['dsg'])].maccor_energy_mwh
-            # log rows and columns that be modified
-            logger.debug(
-                f'Harmonized capacity/energy values for Maccor cyclers. Modified {len(df)} rows and 4 columns.')
-            logger.debug(
-                'Added columns: charge_capacity_mah, charge_energy_mwh, discharge_capacity_mah, discharge_energy_mwh')
-        elif 'arbin_charge_capacity_mah' in df:
+        
+        if 'arbin_charge_capacity_mah' in df:
             df['charge_capacity_mah'] = df[df.step.isin(
                 steps['chg'])].arbin_charge_capacity_mah
             df['charge_energy_mwh'] = df[df.step.isin(
@@ -347,6 +384,25 @@ class Transformer:
                 f'Harmonized capacity/energy values for Arbin cyclers. Modified {len(df)} rows and 4 columns.')
             logger.debug(
                 'Added columns: charge_capacity_mah, charge_energy_mwh, discharge_capacity_mah, discharge_energy_mwh')
+        elif 'maccor_capacity_mah' in df:
+            df['charge_capacity_mah'] = df[df.step.isin(
+                steps['chg'])].maccor_capacity_mah
+            df['discharge_capacity_mah'] = df[df.step.isin(
+                steps['dsg'])].maccor_capacity_mah  
+            if 'maccor_energy_mwh' in df:
+                df['charge_energy_mwh'] = df[df.step.isin(
+                    steps['chg'])].maccor_energy_mwh
+                df['discharge_energy_mwh'] = df[df.step.isin(
+                    steps['dsg'])].maccor_energy_mwh
+                logger.debug(
+                    f'Harmonized capacity/energy values for Maccor cyclers. Modified {len(df)} rows and 4 columns.')
+                logger.debug(
+                    'Added columns: charge_capacity_mah, charge_energy_mwh, discharge_capacity_mah, discharge_energy_mwh')
+            else:
+                logger.debug(
+                    f'Harmonized capacity values for Maccor cyclers. Modified {len(df)} rows and 2 columns.')
+                logger.debug(
+                    'Added columns: charge_capacity_mah, discharge_capacity_mah')
         else:
             logger.warning("No capacity columns were found to refactor!")
 
@@ -613,10 +669,13 @@ class Transformer:
                 ez_df[time_col] = step_slice['test_time_s'] - \
                     step_slice['test_time_s'].iloc[0]
                 ez_df[volt_col] = step_slice['voltage_mv']
-                ez_df[eng_col] = step_slice[eng_col] - \
-                    step_slice[eng_col].iloc[0]
                 ez_df[cap_col] = step_slice[cap_col] - \
                     step_slice[cap_col].iloc[0]
+
+                if eng_col in step_slice.columns:
+                    ez_df[eng_col] = step_slice[eng_col] - \
+                        step_slice[eng_col].iloc[0]
+
                 if step_type == 'charge' and cv_voltage_thresh_mv is not None:
                     # if ez_df is empty, we're at beginning of a cycle and cap/step time should be reset to zero
                     # TODO: add documentation for this
@@ -643,12 +702,15 @@ class Transformer:
                         (self.test_data.cycle == current_cycle) &
                         (self.test_data.step == step),
                         cap_col] += ez_df[cap_col]
-                    self.test_data.loc[
-                        (self.test_data.cycle == current_cycle) &
-                        (self.test_data.step == step),
-                        eng_col] += ez_df[eng_col]
                     step_slice[cap_col] += ez_df[cap_col].iloc[-1]
-                    step_slice[eng_col] += ez_df[eng_col].iloc[-1]
+
+                    if eng_col in self.test_data.columns:
+                        self.test_data.loc[
+                            (self.test_data.cycle == current_cycle) &
+                            (self.test_data.step == step),
+                            eng_col] += ez_df[eng_col]
+                        step_slice[eng_col] += ez_df[eng_col].iloc[-1]
+
                 if not ez_df.empty:
                     # keeps running time across steps. ignoring time between steps
                     step_df[time_col] = (
@@ -656,7 +718,9 @@ class Transformer:
                 # step_slice is updated with above updates to test_data because it's a slice, not copy, of test_data
                 step_df[volt_col] = step_slice[volt_col]
                 step_df[cap_col] = step_slice[cap_col]
-                step_df[eng_col] = step_slice[eng_col]
+                if eng_col in step_slice.columns:
+                    step_df[eng_col] = step_slice[eng_col]
+
                 if step_type == 'charge' and cv_voltage_thresh_mv is not None:
                     # calculate the delta time/cap for each step, sum the deltas in calc_stats() to get cycle time/cap
                     delta_time = step_slice['step_time_s'] - \

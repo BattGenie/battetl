@@ -1,19 +1,21 @@
 import pandas as pd
 import json
+import os
+import copy
 from .Loader import Loader
 from battetl import logger
 
 
 class QuickLoader(Loader):
 
-    def __init__(self, file_name):
+    def __init__(self, file_path):
 
         # The config needed by the BattETL parent class
-        self._file_name = file_name
+        self._file_name = os.path.basename(file_path)
         config = {
             "meta_data": {
                 "test_meta": {
-                    "test_name": file_name,
+                    "test_name": copy.deepcopy(self._file_name),
                     "channel": "0"
                 },
                 "cell": {

@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="battetl",
-    version="1.1.1",
+    version="1.1.2",
     author="Zander Nevitt, Bing Syuan Wang, Eric Ravet, and Chintan Pathak",
     author_email="info@battgenie.life",
     description="A Python module for extracting, transforming, and loading battery data to a database.",
@@ -22,6 +22,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.9, <3.11',
+    python_requires='>=3.9, <3.12',
     license='MIT',
 )
