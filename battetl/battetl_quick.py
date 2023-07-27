@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import json
 import subprocess
 import pandas as pd
 
@@ -10,15 +11,17 @@ from battetl.transform import Transformer
 from battetl.load import QuickLoader
 
 
-def battetl_quick(file_name: str) -> pd.DataFrame:
+def battetl_quick(file_path: str, file_meta = None) -> pd.DataFrame:
     '''
     The BattETL Quick Mode. Extracts test data or cycle stats from a file, transforms it,
     and loads it to the database.
 
     Parameters
     ----------
-    file_name : str
+    file_path : str
         Name of the file to be processed.
+    file_meta : dict
+        A dictionary used to decode unstructured data.
 
     Returns
     -------
@@ -28,7 +31,7 @@ def battetl_quick(file_name: str) -> pd.DataFrame:
 
     extractor = Extractor()
     try:
-        extractor.data_from_files([file_name])
+        extractor.data_from_files([file_path], file_meta)
         raw_test_data = extractor.raw_test_data
         raw_cycle_stats = extractor.raw_cycle_stats
     except Exception as e:
@@ -39,7 +42,7 @@ def battetl_quick(file_name: str) -> pd.DataFrame:
     cycle_stats = pd.DataFrame()
     if not raw_test_data.empty:
         try:
-            transformer.transform_test_data(raw_test_data)
+            transformer.transform_test_data(raw_test_data, file_meta)
             test_data = transformer.test_data
         except Exception as e:
             logger.error('Failed to transform test data', exc_info=True)
@@ -50,19 +53,19 @@ def battetl_quick(file_name: str) -> pd.DataFrame:
         except Exception as e:
             logger.error('Failed to transform cycle stats', exc_info=True)
 
-    loader = QuickLoader(file_name)
+    loader = QuickLoader(file_path)
     if not test_data.empty:
         try:
             loader.load_test_data(test_data)
             logger.info(
-                f'**** Data successfully loaded to test_data table under test_name {file_name} ****')
+                f'**** Data successfully loaded to test_data table under test_name {file_path} ****')
         except Exception as e:
             logger.error('Failed to load test data', exc_info=True)
     elif not cycle_stats.empty:
         try:
             loader.load_cycle_stats(cycle_stats)
             logger.info(
-                f'**** Data successfully loaded to test_data_cycle_stats table under test_name {file_name} ****')
+                f'**** Data successfully loaded to test_data_cycle_stats table under test_name {file_path} ****')
         except Exception as e:
             logger.error('Failed to load cycle stats', exc_info=True)
 
@@ -179,22 +182,32 @@ if __name__ == '__main__':
     if n < 3:
         print("Not enough arguments passed! Exiting!")
         sys.exit()
-    elif n > 3:
+    elif n > 4:
         print("Too many arguments passed! Exiting!")
         sys.exit()
     else:
         for i in range(1, n):
             arg = str(sys.argv[i])
             if arg.startswith('file='):
-                file_name = re.split('file=', arg)[-1]
+                file_path = re.split('file=', arg)[-1]
             elif arg.startswith('db_url='):
                 db_url = re.split('db_url=', arg)[-1]
+            elif arg.startswith('file_meta='):
+                file_meta_path = re.split('file_meta=', arg)[-1]
             else:
                 print("Unknown argument " + arg + "! Exiting!")
                 sys.exit()
 
-    if not os.path.isfile(file_name):
-        print("File path " + file_name + " does not exist! Exiting!")
+    if not os.path.isfile(file_path):
+        print("File path " + file_path + " does not exist! Exiting!")
+        sys.exit()
+
+    file_meta = None
+    if os.path.isfile(file_meta_path):
+        with open(file_meta_path) as file:
+            file_meta = json.load(file)
+    else:
+        print("Invalid path for file_meta! Exiting!")
         sys.exit()
 
     # Assumes a db_url format of:
@@ -233,4 +246,4 @@ if __name__ == '__main__':
     logger.info(docker_result.stdout)
     logger.info(docker_result.stderr)
 
-    battetl_quick(file_name)
+    battetl_quick(file_path, file_meta)

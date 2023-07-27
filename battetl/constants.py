@@ -285,3 +285,15 @@ class Constants:
         'T1_Max.1': 'maccor_discharge_thermocouple_max_c',
         'ACR': 'acr_ohm',
     }
+ 
+    COLUMNS_UNSTRUCTURED_TEST_DATA = {
+        'voltage_mv',
+        'current_ma',
+        'time_s',
+        'other_details',
+    }
+    UNSTRUCTURED_DATA_REQUIRED_KEYS = {
+        'voltage_mv',
+        'current_ma',
+        'pandas_read_csv_args'
+    }

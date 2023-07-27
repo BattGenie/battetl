@@ -27,7 +27,7 @@ class Extractor:
             'steps': {'chg': [], 'dsg': [], 'rst': []}
         }
 
-    def data_from_files(self, paths: list[str]):
+    def data_from_files(self, paths: list[str], file_meta: dict = None) -> pd.DataFrame:
         """
         Extracts multiple test data files into a single pandas DataFrame.
         If only a single data file exists then it only extracts that data.
@@ -36,6 +36,12 @@ class Extractor:
         ----------
         paths : list[str]
             Relative or absolute paths to the target data files.
+        file_meta : dict, optional
+            Dictionary containing the user defined column names for the test data. The default is None.
+        Returns
+        -------
+        pd.DataFrame
+            A pandas DataFrame containing the test data.
         """
         if type(paths) != list:
             raise TypeError('Input paths is not list')
@@ -43,7 +49,14 @@ class Extractor:
         logger.info(f'Total {len(paths)} files')
 
         for path in paths:
-            self.__data_from_file(path)
+            if file_meta:
+                self.__unstructured_data_from_file(
+                    path=path,
+                    file_meta=file_meta)
+            else:
+                self.__data_from_file(path=path)
+
+        logger.info('Extract success')
 
         logger.info('Extract success')
 
@@ -79,6 +92,75 @@ class Extractor:
                     'Unable to identify schedule type from paths: ' + str(paths))
 
         return self.schedule
+
+    def schedule_from_files(self, paths: list[str]) -> dict:
+        """
+        Reads Arbin schedules and associated files or Maccor procedures and associated 
+        files from the passed paths list and saves them together in a nested dictionary.
+
+        Parameters
+        ----------
+        paths : list[str]
+            Relative or absolute paths to the Maccor schedule and associated files
+        """
+        if type(paths) != list:
+            raise TypeError('Input paths is not list')
+
+        logger.info(f'Total {len(paths)} files')
+
+        for i, path in enumerate(paths):
+            if path.endswith('.000'):
+                logger.info("Processing procedure files for Maccor")
+                self.schedule['schedule'] = self.__maccor_procedure_from_files(
+                    paths)
+                break
+            elif path.endswith('.sdu') or path.endswith('.sdx'):
+                logger.info("Processing schedule files for Arbin")
+                self.schedule['schedule'] = self.__arbin_schedule_from_files(
+                    paths)
+
+                break
+            elif i == (len(paths)-1):
+                logger.error(
+                    'Unable to identify schedule type from paths: ' + str(paths))
+
+        return self.schedule
+
+    def __unstructured_data_from_file(self, path: str, file_meta: dict) -> pd.DataFrame:
+        """
+        Reads unstructured data from the passed file path and returns it as a pandas DataFrame.
+        Parameters
+        ----------
+        path : str
+            Relative or absolute path to the datafile.
+        file_meta : dict
+            Dictionary containing the meta data for the file.
+        Returns
+        -------
+        df : pandas.DataFrame
+            A pandas DataFrame containing the data file.
+        """
+        logger.info(f'Load file path: {path}')
+        logger.info(f'Unstructured data from file. File meta: {file_meta}')
+        if not os.path.exists(path):
+            raise FileNotFoundError(f'Unable to load file {path}')
+
+        # Check file_meta contains all required keys
+        Utils.validate_file_meta(file_meta)
+
+        df = pd.read_csv(path, **file_meta['pandas_read_csv_args'])
+
+        self.raw_test_data = pd.concat(
+            [
+                self.raw_test_data,
+                df
+            ],
+            ignore_index=True
+        )
+        logger.debug(
+            f'Update raw_test_data. Total rows: {self.raw_test_data.shape[0]}')
+
+        return df
 
     def __maccor_procedure_from_files(self, paths: list[str]) -> DashOrderedDict:
         """
