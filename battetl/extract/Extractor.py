@@ -58,8 +58,6 @@ class Extractor:
 
         logger.info('Extract success')
 
-        logger.info('Extract success')
-
     def schedule_from_files(self, paths: list[str]) -> dict:
         """
         Reads Arbin schedules and associated files or Maccor procedures and associated 
