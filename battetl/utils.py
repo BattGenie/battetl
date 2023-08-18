@@ -27,7 +27,10 @@ class Utils:
         if os.getenv('ENV') == 'dev':
             logger.info('Set logger level to DEBUG')
             logger.setLevel(logging.DEBUG)
-
+        elif os.getenv('ENV') in ['prd', 'prod']:
+            logger.info('Set logger level to WARNING')
+            logger.setLevel(logging.WARNING)
+        
     def load_config(config_path: str) -> dict:
         """
         Load config file from path

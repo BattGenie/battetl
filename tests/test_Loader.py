@@ -76,6 +76,7 @@ def test_lookup_cell_id():
 
     # Lookup non-existent cell_id
     config['meta_data']['cell']['manufacturer_sn'] = Values.TEST_HELPER.generate_random_string()
+    config['meta_data']['cell']['label'] = Values.TEST_HELPER.generate_random_string()
     loader = Loader(config)
     cell_id = loader._lookup_cell_id()
     assert (cell_id is None)
@@ -577,6 +578,7 @@ def test_insert_cell():
 
     # Test inserting a cell with a cell_type_id that already exists.
     config['meta_data']['cell']['manufacturer_sn'] = Values.TEST_HELPER.generate_random_string()
+    config['meta_data']['cell']['label'] = Values.TEST_HELPER.generate_random_string()
     loader = Loader(config)
     cell_type_id = loader._Loader__lookup_cell_type_id()
     assert (cell_type_id)
@@ -588,9 +590,11 @@ def test_insert_cell():
     newest_cell_id = new_row[0]
     newest_cell_type_id = new_row[1]
     newest_sn = new_row[7]
+    newest_label = new_row[3]
     assert (newest_cell_id == cell_id)
     assert (newest_cell_type_id == cell_type_id)
     assert (newest_sn == config['meta_data']['cell']['manufacturer_sn'])
+    assert(newest_label == config['meta_data']['cell']['label'])
 
     del loader
     Values.TEST_HELPER.delete_entry(target_table='cells',

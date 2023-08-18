@@ -15,6 +15,7 @@ ARBIN_MULTIPLE_PATH = os.path.join(ARBIN_PATH, 'multiple_data_files')
 ICT_PATH = os.path.join(ARBIN_PATH, 'ict_data_files')
 CCCV_PATH = os.path.join(ARBIN_PATH, 'cccv_data_files')
 RESET_CAP_PATH = os.path.join(MACCOR_PATH, 'reset_cap_data')
+STEP_ORDER_PATH = os.path.join(ARBIN_PATH, 'step_order_data_files')
 
 
 @pytest.mark.transform
@@ -425,3 +426,33 @@ def test_max_temperature():
         transformer.cycle_stats.loc[0:7, 'calculated_max_discharge_temp_c'] - max_temps.loc[0:7, 'max_discharge_temp'])).all()
     assert (0.001 > abs(
         transformer.cycle_stats.loc[1:8, 'calculated_max_charge_temp_c'] - max_temps.loc[1:8, 'max_charge_temp'])).all()
+
+
+@pytest.mark.transform
+@pytest.mark.arbin
+@pytest.mark.stats
+def test_step_order_stat_calcs():
+    data_path = join(
+        STEP_ORDER_PATH, 'BG_Arbin_MBC5v2_Cell_Cell6_Channel_25_Wb_1.csv')
+    stat_path = join(
+        STEP_ORDER_PATH, 'BG_Arbin_MBC5v2_25R_Cell6_Channel_25_StatisticByCycle.CSV')
+    schedule_path = join(
+        STEP_ORDER_PATH, 'BG_Arbin_MBC5_25R_3+BG_Arbin_25R.sdx')
+
+    extractor = Extractor()
+    extractor.data_from_files([data_path])
+    extractor.data_from_files([stat_path])
+    schedule = extractor.schedule_from_files([schedule_path])
+
+    transformer = Transformer()
+    transformer.transform_test_data(extractor.raw_test_data)
+    transformer.transform_cycle_stats(extractor.raw_cycle_stats)
+
+    transformer.calc_cycle_stats(
+        schedule['steps'], cv_voltage_threshold_mv=4420)
+
+    fifty_percent_charge_time, eighty_percent_charge_time = transformer.cycle_stats.loc[transformer.cycle_stats.cycle == 8, [
+        'calculated_fifty_percent_charge_time_s', 'calculated_eighty_percent_charge_time_s']].values[0]
+
+    assert (0.01 > abs(fifty_percent_charge_time / 614.07 - 1))
+    assert (0.01 > abs(eighty_percent_charge_time / 1040.08 - 1))

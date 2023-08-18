@@ -1,0 +1,5 @@
+﻿,,,TEST REPORT,,,,,,,,,,,
+,, Test Name,BG_Arbin_MBC5v2_Cell_Cell6, Serial Number,, C:\Users\Arbin\Desktop\BG\Arbin\BG_Arbin_MBC5v2_Cell_Cell6_2023_07_03_165403,,,,,,,,
+,,Export Time,7/25/2023 16:20,213079,,,,,,,,,,
+Channel,Start DateTime,Schedule File Name,Creator,Comments,Software Version,Schedule Version,MASS(g),Specific Capacity(Ah/g),Capacity(Ah),BarCode,Has Aux,Has Specail,Log Aux Data Flag,Log Special Flag
+25,7/3/2023 16:54,BG\Arbin\BG_Arbin_MBC5_25R_3+BG_Arbin_25R.sdx,admin,,Mits8 PV Build: 202110,Schedule Version 8.00.11,0,0,2.5,,512,0,TRUE,FALSE

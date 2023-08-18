@@ -354,6 +354,19 @@ class Loader:
         `self.engine `is an sqlalchemy Engine instance used by Pandas for data
         frame insertion.
 
+        The database credentials are as follows:
+            - DB_TARGET - The name of the database
+            - DB_USERNAME - The username to login with.
+            - DB_PASSWORD- The password for the username.
+            - DB_HOSTNAME - The host name to connect to. 
+            - DB_PORT - The port to connect to.
+
+        The following are optional:
+            - DB_SSLMODE - Defaults to 'prefer'. 'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'
+            - DB_SSLROOTCERT - Path to the root certificate file.
+            - DB_SSLCERT - Path to the certificate file.
+            - DB_SSLKEY - Path to the key file.
+
         Returns
         -------
         success : bool
@@ -371,6 +384,10 @@ class Loader:
                 host=os.getenv('DB_HOSTNAME'),
                 port=os.getenv('DB_PORT'),
                 database=os.getenv('DB_TARGET'),
+                sslmode=os.getenv('DB_SSLMODE', 'prefer'),
+                sslrootcert=os.getenv('DB_SSLROOTCERT', None),
+                sslcert=os.getenv('DB_SSLCERT', None),
+                sslkey=os.getenv('DB_SSLKEY', None),
             )
             self._conn = postgreSQL_pool.getconn()
             self._conn.autocommit = True
@@ -522,10 +539,14 @@ class Loader:
                 WHERE
                     cell_type_id = {cell_type_id}
                 AND 
+                    label = {label}
+                AND
                     manufacturer_sn = {manufacturer_sn}
             """).format(
                 cell_type_id=psycopg2.sql.Literal(
                     cell_type_id),
+                label=psycopg2.sql.Literal(
+                    self.config['cell']['label']),
                 manufacturer_sn=psycopg2.sql.Literal(
                     self.config['cell']['manufacturer_sn'])
             )

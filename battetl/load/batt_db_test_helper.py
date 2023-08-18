@@ -82,6 +82,7 @@ class BattDbTestHelper(Loader):
             target_table='sil_meta', dict_to_load=upload_dict, pk_id_col='sil_id')
         assert (self.test_id)
 
+
     def read_last_row(self, target_table: str, pk_col_name: str) -> tuple:
         """
         Returns the last row in the target_table, sorting off of pk_col_name.
@@ -114,6 +115,23 @@ class BattDbTestHelper(Loader):
             last_row = cursor.fetchone()
 
         return last_row
+    
+    def load_sil_data(self, df: pd.DataFrame) -> int:
+        """
+        Loads the passed sil_data to the database. 
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Dataframe with data to load to `sil_data` table
+        
+        Returns
+        -------
+        num_rows_loaded : int
+            The number of rows loaded to the `sil_data` table
+        """
+        df['sil_id'] = self.sil_id
+        return self._load_dataframe(df, 'sil_data')
 
     def load_df_to_db(self, df: pd.DataFrame, target_table: str) -> int:
         """
