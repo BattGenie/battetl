@@ -35,7 +35,8 @@ def cell_config():
                 "channel": 10
             },
             "cell": {
-                "manufacturer_sn": "0001"
+                "manufacturer_sn": "0001",
+                "label": "1"
             },
             "cell_meta": {
                 "manufacturer": "FakeMN",

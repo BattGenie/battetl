@@ -662,7 +662,8 @@ class Extractor:
             skiprows=headerLines,
             sep='\t' if headerLines > 0 else ',',
             skipinitialspace=True,
-            index_col=False
+            index_col=False,
+            encoding_errors='replace'
         )
 
         logger.debug(
@@ -727,7 +728,7 @@ class Extractor:
                 Header info
         """
 
-        file = open(path, 'r')
+        file = open(path, 'r', errors='replace')
         count = 0
         header = {}
 

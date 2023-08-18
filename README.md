@@ -262,6 +262,10 @@ DB_USERNAME=YOUR_USERNAME
 DB_PASSWORD=YOUR_PASSWORD
 DB_HOSTNAME=localhost
 DB_PORT=5432
+# DB_SSLMODE=prefer # disable, allow, prefer, require, verify-ca, verify-full
+# DB_SSLROOTCERT=PATH_TO_ROOT_CERT
+# DB_SSLCERT=PATH_TO_CLIENT_CERT
+# DB_SSLKEY=PATH_TO_CLIENT_KEY
 ```
 
 An example .env file is given within `examples/.env.example`

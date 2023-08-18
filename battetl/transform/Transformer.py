@@ -370,7 +370,6 @@ class Transformer:
         df : pd.DataFrame
             A pandas DataFrame with harmonized capacity/energy values across cyclers.
         """
-        
         if 'arbin_charge_capacity_mah' in df:
             df['charge_capacity_mah'] = df[df.step.isin(
                 steps['chg'])].arbin_charge_capacity_mah
@@ -388,7 +387,7 @@ class Transformer:
             df['charge_capacity_mah'] = df[df.step.isin(
                 steps['chg'])].maccor_capacity_mah
             df['discharge_capacity_mah'] = df[df.step.isin(
-                steps['dsg'])].maccor_capacity_mah  
+                steps['dsg'])].maccor_capacity_mah
             if 'maccor_energy_mwh' in df:
                 df['charge_energy_mwh'] = df[df.step.isin(
                     steps['chg'])].maccor_energy_mwh
@@ -524,7 +523,7 @@ class Transformer:
 
         stats['calculated_charge_capacity_mah'] = ez_df['charge_capacity_mah'].iloc[-1]
         stats['calculated_charge_energy_mwh'] = ez_df['charge_energy_mwh'].iloc[-1]
-        stats['calculated_charge_time_s'] = ez_df['ellapsed_time_s'].iloc[-1]
+        stats['calculated_charge_time_s'] = ez_df['elapsed_time_s'].iloc[-1]
 
         stats['calculated_cc_charge_time_s'] = ez_df.cc_time_s.sum()
         stats['calculated_cv_charge_time_s'] = ez_df.cv_time_s.sum()
@@ -535,10 +534,10 @@ class Transformer:
         eighty_percent_cap_mah = stats['calculated_charge_capacity_mah'] * 0.8
         fifty_percent_cap_mah = stats['calculated_charge_capacity_mah'] * 0.5
         try:
-            eighty_percent_cap_time_s = (ez_df[ez_df.charge_capacity_mah > eighty_percent_cap_mah].ellapsed_time_s.iloc[0]
-                                         - ez_df.ellapsed_time_s.iloc[0])
-            half_percent_cap_time_s = (ez_df[ez_df.charge_capacity_mah > fifty_percent_cap_mah].ellapsed_time_s.iloc[0]
-                                       - ez_df.ellapsed_time_s.iloc[0])
+            eighty_percent_cap_time_s = (ez_df[ez_df.charge_capacity_mah > eighty_percent_cap_mah].elapsed_time_s.iloc[0]
+                                         - ez_df.elapsed_time_s.iloc[0])
+            half_percent_cap_time_s = (ez_df[ez_df.charge_capacity_mah > fifty_percent_cap_mah].elapsed_time_s.iloc[0]
+                                       - ez_df.elapsed_time_s.iloc[0])
         except:
             eighty_percent_cap_time_s = float('nan')
             half_percent_cap_time_s = float('nan')
@@ -595,7 +594,7 @@ class Transformer:
 
         stats['calculated_discharge_capacity_mah'] = ez_df['discharge_capacity_mah'].iloc[-1]
         stats['calculated_discharge_energy_mwh'] = ez_df['discharge_energy_mwh'].iloc[-1]
-        stats['calculated_discharge_time_s'] = ez_df['ellapsed_time_s'].iloc[-1]
+        stats['calculated_discharge_time_s'] = ez_df['elapsed_time_s'].iloc[-1]
 
         if cell_thermocouple:
             logger.debug(
@@ -630,13 +629,13 @@ class Transformer:
         -------
         ez_df: pd.DataFrame
             DataFrame containing values filtered to charge steps with cumulative capacity
-            and ellapsed time calculated.
+            and elapsed time calculated.
         """
         logger.debug(
             f'Calculating cumulative capacity with {len(cycle_df)} rows, \
                   {len(steps)} {step_type} steps and cv_voltage_thresh_mv: {cv_voltage_thresh_mv}')
 
-        time_col = 'ellapsed_time_s'
+        time_col = 'elapsed_time_s'
         volt_col = 'voltage_mv'
         cc_time = 'cc_time_s'
         cv_time = 'cv_time_s'
@@ -655,46 +654,25 @@ class Transformer:
         ez_df = pd.DataFrame(
             columns=[time_col, volt_col, cap_col, eng_col, cc_time, cv_time, cc_cap, cv_cap])
 
-        # Iterate through each charge step to calculate cumulative capacity
-        for _, step in enumerate(steps):
+        # filter step slice to charge/discharge steps
+        relevant_steps = [step for step in cycle_df.step.unique()
+                          if step in steps]
 
+        # Iterate through each charge step to calculate cumulative capacity
+        for step in relevant_steps:
             step_slice = cycle_df[cycle_df.step == step]
-            step_df = pd.DataFrame(
-                columns=[time_col, volt_col, cap_col, eng_col, cc_time, cv_time, cc_cap, cv_cap])
 
             if step_slice.empty:
                 continue
+            step_df = pd.DataFrame(
+                columns=[time_col, volt_col, cap_col, eng_col, cc_time, cv_time, cc_cap, cv_cap])
 
-            if ez_df.empty:
-                ez_df[time_col] = step_slice['test_time_s'] - \
-                    step_slice['test_time_s'].iloc[0]
-                ez_df[volt_col] = step_slice['voltage_mv']
-                ez_df[cap_col] = step_slice[cap_col] - \
-                    step_slice[cap_col].iloc[0]
-
-                if eng_col in step_slice.columns:
-                    ez_df[eng_col] = step_slice[eng_col] - \
-                        step_slice[eng_col].iloc[0]
-
-                if step_type == 'charge' and cv_voltage_thresh_mv is not None:
-                    # if ez_df is empty, we're at beginning of a cycle and cap/step time should be reset to zero
-                    # TODO: add documentation for this
-                    delta_time = step_slice['step_time_s'] - \
-                        step_slice['step_time_s'].shift(1, fill_value=0)
-                    ez_df[cc_time] = np.where(
-                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_time, 0)
-                    ez_df[cv_time] = np.where(
-                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_time, 0)
-                    delta_cap = step_slice[cap_col] - \
-                        step_slice[cap_col].shift(1, fill_value=0)
-                    ez_df[cc_cap] = np.where(
-                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_cap, 0)
-                    ez_df[cv_cap] = np.where(
-                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_cap, 0)
-                # TODO: corner case of ICT will still need above logic for discharge
-                elif step_type == 'discharge':
-                    ez_df[[cc_time, cc_cap, cv_time, cv_cap]] = np.nan
-            else:
+            # Checks if we've processed at least one step already
+            if not ez_df.empty:
+                # Keeps running time across steps. Ignoring time between non-charge/discharge steps
+                step_df[time_col] = \
+                    (step_slice['test_time_s'] - step_slice['test_time_s'].iloc[0]) + ez_df[time_col].iloc[-1]
+                
                 # This catches if capacity was reset after each step. Modifies test_data DF in place.
                 if step_slice[cap_col].iloc[0] < ez_df[cap_col].iloc[-1]:
                     current_cycle = cycle_df.cycle.iloc[0]
@@ -710,34 +688,36 @@ class Transformer:
                             (self.test_data.step == step),
                             eng_col] += ez_df[eng_col]
                         step_slice[eng_col] += ez_df[eng_col].iloc[-1]
+            else:
+                step_df[time_col] = step_slice['test_time_s'] - \
+                    step_slice['test_time_s'].iloc[0]
 
-                if not ez_df.empty:
-                    # keeps running time across steps. ignoring time between steps
-                    step_df[time_col] = (
-                        step_slice['test_time_s'] - step_slice['test_time_s'].iloc[0]) + ez_df[time_col].iloc[-1]
-                # step_slice is updated with above updates to test_data because it's a slice, not copy, of test_data
-                step_df[volt_col] = step_slice[volt_col]
-                step_df[cap_col] = step_slice[cap_col]
-                if eng_col in step_slice.columns:
-                    step_df[eng_col] = step_slice[eng_col]
+            # Step_slice is updated with above updates to test_data because it's a slice, not copy, of test_data
+            step_df[volt_col] = step_slice[volt_col]
+            step_df[cap_col] = step_slice[cap_col]
+            if eng_col in step_slice.columns:
+                step_df[eng_col] = step_slice[eng_col]
 
-                if step_type == 'charge' and cv_voltage_thresh_mv is not None:
-                    # calculate the delta time/cap for each step, sum the deltas in calc_stats() to get cycle time/cap
-                    delta_time = step_slice['step_time_s'] - \
-                        step_slice['step_time_s'].shift(1, fill_value=0)
-                    step_df[cc_time] = np.where(
-                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_time, 0)
-                    step_df[cv_time] = np.where(
-                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_time, 0)
-                    delta_cap = step_slice[cap_col] - step_slice[cap_col].shift(
-                        1, fill_value=ez_df[cap_col].iloc[-1])
-                    step_df[cc_cap] = np.where(
-                        step_slice[volt_col] < cv_voltage_thresh_mv, delta_cap, 0)
-                    step_df[cv_cap] = np.where(
-                        step_slice[volt_col] >= cv_voltage_thresh_mv, delta_cap, 0)
-                elif step_type == 'discharge':
-                    step_df[[cc_time, cc_cap, cv_time, cv_cap]] = np.nan
-                ez_df = pd.concat([ez_df, step_df])
+            if step_type == 'charge' and cv_voltage_thresh_mv is not None:
+                latest_capacity = ez_df[cap_col].iloc[-1] if not ez_df.empty else 0
+
+                # Calculate the delta time/cap for each step, sum the deltas in calc_stats() to get cycle charge time/cap
+                delta_time = step_slice['step_time_s'] - \
+                    step_slice['step_time_s'].shift(1, fill_value=0)
+                step_df[cc_time] = np.where(
+                    step_slice[volt_col] < cv_voltage_thresh_mv, delta_time, 0)
+                step_df[cv_time] = np.where(
+                    step_slice[volt_col] >= cv_voltage_thresh_mv, delta_time, 0)
+                delta_cap = step_slice[cap_col] - step_slice[cap_col].shift(
+                    1, fill_value=latest_capacity)
+                step_df[cc_cap] = np.where(
+                    step_slice[volt_col] < cv_voltage_thresh_mv, delta_cap, 0)
+                step_df[cv_cap] = np.where(
+                    step_slice[volt_col] >= cv_voltage_thresh_mv, delta_cap, 0)
+            elif step_type == 'discharge':
+                step_df[[cc_time, cc_cap, cv_time, cv_cap]] = np.nan
+            ez_df = pd.concat([ez_df, step_df])
+
         return ez_df
 
     def __consolidate_temps(self, df):
