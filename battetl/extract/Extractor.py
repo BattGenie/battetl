@@ -744,7 +744,9 @@ class Extractor:
             line = list(filter(None, line))
 
             lineLen = len(line)
-            if lineLen == 2 or lineLen == 0 or line[0][-1] == ':':
+            if lineLen == 2 or lineLen == 0 or line[0][-1] == ':' or line in [
+                ['Charge'], ['Discharge']
+            ]:
                 count += 1
 
                 # Extract header info
