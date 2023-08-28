@@ -3,7 +3,7 @@ import json
 import os
 import copy
 from .Loader import Loader
-from battetl import logger
+from battetl import logger, Constants
 
 
 class QuickLoader(Loader):
@@ -44,7 +44,7 @@ class QuickLoader(Loader):
                 }
             }
         }
-        super().__init__(config)
+        super().__init__(config=config, battdb_version=Constants.BATTDB_QUICK_SCHEMA_VERSION)
 
     def load_test_data(self, df: pd.DataFrame, retry_cnt: int = 0) -> int:
         """

@@ -22,7 +22,9 @@ class Loader:
     def __init__(
             self,
             config: dict,
-            env_path: str = os.path.join(os.getcwd(), '.env')):
+            env_path: str = os.path.join(os.getcwd(), '.env'),
+            battdb_version: float = Constants.BATTDB_SCHEMA_VERSION,
+    ):
         """
         An interface to load battery test data to a database.
 
@@ -39,6 +41,9 @@ class Loader:
                 DB_PASSWORD - The password to connect to the database.
                 DB_HOSTNAME - The hostname of the database.
                 DB_PORT - The port of the database.
+        battdb_version : float, optional
+            The expected schema version of the target database. The default is
+            Constants.BATTDB_SCHEMA_VERSION.
         """
         Utils.load_env(env_path)
 
@@ -134,6 +139,7 @@ class Loader:
 
         assert (self.__validate_config(config))
         assert (self.__create_connection())
+        assert (self.__check_battdb_version(battdb_version))
 
     def load_test_data(self, df: pd.DataFrame, retry_cnt: int = 0) -> int:
         """
@@ -410,6 +416,53 @@ class Loader:
             logger.error(e)
 
         return success
+
+    def __check_battdb_version(self, battdb_version: float) -> bool:
+        """
+        Checks the schema version of the target database to ensure it is compatible
+
+        Parameters
+        ----------
+        battdb_version : float
+            The expected schema version of the target database.
+
+        Returns
+        -------
+        valid : bool
+            True if the schema version is valid, False otherwise.
+        """
+        valid = False
+        with self._conn.cursor() as cursor:
+            stmt = psycopg2.sql.SQL("""
+                SELECT
+                    version
+                FROM
+                    flyway_schema_history
+                ORDER BY
+                    version
+                DESC
+                LIMIT 1
+            """)
+            cursor.execute(stmt)
+            result = cursor.fetchone()
+
+        if result:
+            version = float(result[0])
+            if version == battdb_version:
+                valid = True
+                logger.info(
+                    f'BattDB schema version {result[0]} found in database')
+            else:
+                if version > battdb_version:
+                    err = f'BattDB schema version {result[0]} found in database is newer than expected version {battdb_version}. Please update BattETL.'
+                    logger.error(err)
+                else:
+                    err = f'BattDB schema version {result[0]} found in database is older than expected version {battdb_version}. Please update BattDB.'
+                    logger.error(err)
+        else:
+            logger.error(f'No BattDB schema version found in database')
+
+        return valid
 
     def __create_other_details(self, df: pd.DataFrame, table_columns: set) -> pd.DataFrame:
         """
