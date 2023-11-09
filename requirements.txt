@@ -3,7 +3,7 @@ python-dotenv>=1.0.0
 pandas==2.0.3
 SQLAlchemy==2.0.18
 psycopg2-binary==2.9.6
-pydash==5.1.0
+pydash==6.0.0
 xmltodict==0.12.0
 schema==0.7.5
 pyyaml>=5.4.1
