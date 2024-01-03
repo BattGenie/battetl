@@ -35,7 +35,7 @@ handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter_stream)
 logger.addHandler(handler_stream)
 
-log_format_file = '%(asctime)s %(levelname)s [%(module)s:%(lineno)d] %(message)s'
+log_format_file = '{ "time": "%(asctime)s", "timestamp": "%(created)f", "level": "%(levelname)s", "name": "%(name)s", "thread": "%(threadName)s", "process": "%(process)d", "message": "%(message)s" }'
 formatter_file = logging.Formatter(fmt=log_format_file)
 handler_file = RotatingFileHandler(
     LOG_FILE_PATH, maxBytes=LOG_MAX_SIZE, backupCount=10, delay=True)
