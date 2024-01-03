@@ -18,6 +18,7 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
     - [Unstructured data](#unstructured-data)
   - [Config File](#config-file)
   - [Env File](#env-file)
+  - [BattDB Version Check](#battdb-version-check)
   - [Data Export Requirements](#data-export-requirements)
     - [Maccor](#maccor)
     - [Arbin](#arbin)
@@ -269,6 +270,15 @@ DB_PORT=5432
 ```
 
 An example .env file is given within `examples/.env.example`
+
+### BattDB Version Check
+
+A version check was added to make sure that the correct database migrations have been applied before BattETL tries to load data into the database to ease safe schema updates. Please update the `battetl/constants.py` lines below with the latest schema version:
+
+```    
+BATTDB_SCHEMA_VERSION = 9.1
+BATTDB_QUICK_SCHEMA_VERSION = 1.1
+```
 
 ### Data Export Requirements
 

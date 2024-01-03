@@ -30,7 +30,7 @@ class BattDbTestHelper(Loader):
         '''
         Creates various entries into the database that the tests assume exist. 
         Assert to make sure the inserts actually happened. If they fail, then 
-        likely there is data in the database thats needs to be cleared. Easiest course 
+        likely there is data in the database that needs to be cleared. Easiest course 
         of action in that case is rebuilding the database from scratch. 
         '''
         self.cell_type_id = self._Loader__insert_cell_meta()
@@ -80,6 +80,12 @@ class BattDbTestHelper(Loader):
                        'cell_type_id': self.cell_type_id}
         self.sil_id = self._perform_insert(
             target_table='sil_meta', dict_to_load=upload_dict, pk_id_col='sil_id')
+        
+        upload_dict = {'test_id': self.test_id,
+                       'user_id': 'test_helper',
+                       'cell_type_id': self.cell_type_id}
+        self.sim_id = self._perform_insert(
+            target_table='sim_meta', dict_to_load=upload_dict, pk_id_col='sim_id')
         assert (self.test_id)
 
 
@@ -133,6 +139,23 @@ class BattDbTestHelper(Loader):
         df['sil_id'] = self.sil_id
         return self._load_dataframe(df, 'sil_data')
 
+    def load_sim_data(self, df: pd.DataFrame) -> int:
+        """
+        Loads the passed sim_data to the database. 
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Dataframe with data to load to `sim_data` table
+        
+        Returns
+        -------
+        num_rows_loaded : int
+            The number of rows loaded to the `sim_data` table
+        """
+        df['sim_id'] = self.sim_id
+        return self._load_dataframe(df, 'sim_data')
+
     def load_df_to_db(self, df: pd.DataFrame, target_table: str) -> int:
         """
         Loads the passed data frame to the passed target_table in the database
@@ -158,6 +181,8 @@ class BattDbTestHelper(Loader):
         '''
         self.delete_entry(
             'sil_meta', 'sil_id', self.sil_id)
+        self.delete_entry(
+            'sim_meta', 'sim_id', self.sim_id)
         self.delete_entry(
             'test_meta', 'test_id', self.test_id)
         self.delete_entry(
@@ -209,6 +234,7 @@ class BattDbTestHelper(Loader):
             ('test_data', 'test_id', self.test_id),
             ('test_data_cycle_stats', 'test_id', self.test_id),
             ('sil_data', 'sil_id', self.sil_id),
+            ('sim_data', 'sim_id', self.sim_id),
         ]
         for data_info in data_to_delete_info:
             self.delete_entry(data_info[0], data_info[1], data_info[2])
