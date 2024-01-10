@@ -439,7 +439,7 @@ class Loader:
                 FROM
                     flyway_schema_history
                 ORDER BY
-                    version
+                    version::float
                 DESC
                 LIMIT 1
             """)
