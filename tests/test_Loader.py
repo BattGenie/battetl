@@ -678,7 +678,7 @@ def test_insert_test_meta():
     newest_cell_id = new_row[1]
     newest_schedule_id = new_row[2]
     newest_test_name = new_row[3]
-    newest_cycler_id = new_row[-1]
+    newest_cycler_id = new_row[15]
     assert (newest_test_id == test_id)
     assert (newest_cell_id == cell_id)
     assert (newest_cycler_id == cycler_id)
@@ -731,7 +731,7 @@ def test_insert_test_meta():
     newest_cell_id = new_row[1]
     newest_schedule_id = new_row[2]
     newest_test_name = new_row[3]
-    newest_cycler_id = new_row[-1]
+    newest_cycler_id = new_row[15]
     assert (newest_test_id == test_id)
     assert (newest_cell_id == cell_id)
     assert (newest_cycler_id == cycler_id)

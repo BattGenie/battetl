@@ -193,6 +193,10 @@ class Loader:
 
                 num_rows_loaded += self._load_dataframe(
                     df=df_copy, target_table='test_data')
+
+                # Update test_meta start_date and end_date
+                self.__update_first_and_last_recorded_datetime(test_id)
+
         except Exception as e:
             logger.error('Error loading test data')
             if retry_cnt < Constants.DATABASE_MAX_RETRIES:
@@ -1171,3 +1175,32 @@ class Loader:
                 raise e
 
         return num_rows_inserted
+
+    def __update_first_and_last_recorded_datetime(self, test_id):
+        """
+        Updates the first_recorded_datetime and last_recorded_datetime for the test
+
+        Parameters
+        ----------
+        test_id : int
+            The test_id for the test to update.
+        """
+        logger.info(f'Updating first_recorded_datetime and last_recorded_datetime for test_id={test_id}')
+        with self._conn.cursor() as cursor:
+            cursor.execute("""
+                UPDATE test_meta
+                SET first_recorded_datetime = (
+                    SELECT MIN(recorded_datetime)
+                    FROM test_data
+                    WHERE test_data.test_id = test_meta.test_id
+                ),
+                last_recorded_datetime = (
+                    SELECT MAX(recorded_datetime)
+                    FROM test_data
+                    WHERE test_data.test_id = test_meta.test_id
+                )
+                WHERE test_meta.test_id = %(test_id)s
+            """, {
+                'test_id': str(test_id)
+            })
+            self._conn.commit()
