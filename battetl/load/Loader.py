@@ -172,7 +172,11 @@ class Loader:
 
             latest_unixtime_s = self.__lookup_latest_unixtime()
             if latest_unixtime_s:
+                logger.info(f'Data rows to load: {df_copy.shape[0]}')
+                logger.info(
+                    f'Found previous data with latest unixtime_s: {latest_unixtime_s}')
                 df_copy = df_copy[df_copy['unixtime_s'] > latest_unixtime_s]
+                logger.info(f'New data rows to load: {df_copy.shape[0]}')
 
             if df_copy.shape[0] > 0:
                 # Move fields to other_details
@@ -196,9 +200,13 @@ class Loader:
 
                 # Update test_meta start_date and end_date
                 self.__update_first_and_last_recorded_datetime(test_id)
+            else:
+                logger.info(
+                    f'No new data to load to test_data table for test_id')
 
         except Exception as e:
             logger.error('Error loading test data')
+            logger.error(e)
             if retry_cnt < Constants.DATABASE_MAX_RETRIES:
                 logger.info(
                     f'Retrying load_test_data() {retry_cnt+1}/{Constants.DATABASE_MAX_RETRIES}')
@@ -1185,21 +1193,30 @@ class Loader:
         test_id : int
             The test_id for the test to update.
         """
-        logger.info(f'Updating first_recorded_datetime and last_recorded_datetime for test_id={test_id}')
+        logger.info(
+            f'Updating first_recorded_datetime and last_recorded_datetime for test_id={test_id}')
         with self._conn.cursor() as cursor:
+            # "GROUP BY" is required to avoid error
+            # https://stackoverflow.com/a/19602031
             cursor.execute("""
                 UPDATE test_meta
                 SET first_recorded_datetime = (
-                    SELECT MIN(recorded_datetime)
+                    SELECT recorded_datetime
                     FROM test_data
-                    WHERE test_data.test_id = test_meta.test_id
+                    WHERE test_id = %(test_id)s
+                    GROUP BY test_data_id, recorded_datetime
+                    ORDER BY test_data_id ASC
+                    LIMIT 1
                 ),
                 last_recorded_datetime = (
-                    SELECT MAX(recorded_datetime)
+                    SELECT recorded_datetime
                     FROM test_data
-                    WHERE test_data.test_id = test_meta.test_id
+                    WHERE test_id = %(test_id)s
+                    GROUP BY test_data_id, recorded_datetime
+                    ORDER BY test_data_id DESC
+                    LIMIT 1
                 )
-                WHERE test_meta.test_id = %(test_id)s
+                WHERE test_id = %(test_id)s
             """, {
                 'test_id': str(test_id)
             })

@@ -29,13 +29,13 @@ LOG_FILE_PATH = os.path.join(LOG_DIR, LOG_FILE_NAME)
 # message: The logged message.
 logger = logging.getLogger('battetl')
 
-log_format_stream = f'%(asctime)s %(levelname)s [%(module)s:%(lineno)d] %(message).{STREAM_LOG_MAX_LENGTH}s'
+log_format_stream = f'"%(asctime)s [%(levelname)s][%(filename)s:%(lineno)d][%(name)s] %(message)s.{STREAM_LOG_MAX_LENGTH}s'
 formatter_stream = logging.Formatter(fmt=log_format_stream)
 handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter_stream)
 logger.addHandler(handler_stream)
 
-log_format_file = '{ "time": "%(asctime)s", "timestamp": "%(created)f", "level": "%(levelname)s", "name": "%(name)s", "thread": "%(threadName)s", "process": "%(process)d", "message": "%(message)s" }'
+log_format_file = '{ "time": "%(asctime)s", "timestamp": "%(created)f", "level": "%(levelname)s", "file": "%(filename)s:%(lineno)d", "name": "%(name)s", "thread": "%(threadName)s", "process": "%(process)d", "message": "%(message)s" }'
 formatter_file = logging.Formatter(fmt=log_format_file)
 handler_file = RotatingFileHandler(
     LOG_FILE_PATH, maxBytes=LOG_MAX_SIZE, backupCount=10, delay=True)

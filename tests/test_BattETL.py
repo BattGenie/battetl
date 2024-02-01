@@ -89,12 +89,23 @@ class TestBattetl:
     def test_load(self):
         Values.cell.load()
 
+        db_last_row_test_meta = Values.TEST_HELPER.read_last_row(
+            'test_meta', 'test_id')
+        db_first_row_test_data = Values.TEST_HELPER.read_first_row(
+            'test_data', 'test_data_id')
         db_last_row_test_data = Values.TEST_HELPER.read_last_row(
             'test_data', 'test_data_id')
         db_last_row_cycle_stats = Values.TEST_HELPER.read_last_row(
             'test_data_cycle_stats', 'cycle_stats_id')
         db_last_row_cells_meta = Values.TEST_HELPER.read_last_row(
             'cells_meta', 'cell_type_id')
+
+        # Check that the first_recorded_datetime is the same as the first row of the test_data table
+        assert db_last_row_test_meta[16] == db_first_row_test_data[8], \
+            'first_recorded_datetime should equal the first row of the test_data table'
+        # Check that the last_recorded_datetime is the same as the last row of the test_data table
+        assert db_last_row_test_meta[17] == db_last_row_test_data[8], \
+            'first_recorded_datetime should equal the first row of the test_data table'
 
         # Check that the voltage_mv is the same as the last row of the test_data table
         assert float(db_last_row_test_data[7]) == 4186.39, \
