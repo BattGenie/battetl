@@ -28,10 +28,10 @@ class BattDbTestHelper(Loader):
 
     def create_test_db_entries(self):
         '''
-        Creates various entries into the database that the tests assume exist. 
-        Assert to make sure the inserts actually happened. If they fail, then 
-        likely there is data in the database that needs to be cleared. Easiest course 
-        of action in that case is rebuilding the database from scratch. 
+        Creates various entries into the database that the tests assume exist.
+        Assert to make sure the inserts actually happened. If they fail, then
+        likely there is data in the database that needs to be cleared. Easiest course
+        of action in that case is rebuilding the database from scratch.
         '''
         self.cell_type_id = self._Loader__insert_cell_meta()
         assert (self.cell_type_id)
@@ -80,7 +80,7 @@ class BattDbTestHelper(Loader):
                        'cell_type_id': self.cell_type_id}
         self.sil_id = self._perform_insert(
             target_table='sil_meta', dict_to_load=upload_dict, pk_id_col='sil_id')
-        
+
         upload_dict = {'test_id': self.test_id,
                        'user_id': 'test_helper',
                        'cell_type_id': self.cell_type_id}
@@ -88,6 +88,38 @@ class BattDbTestHelper(Loader):
             target_table='sim_meta', dict_to_load=upload_dict, pk_id_col='sim_id')
         assert (self.test_id)
 
+    def read_first_row(self, target_table: str, pk_col_name: str) -> tuple:
+        """
+        Returns the first row in the target_table, sorting off of pk_col_name.
+
+        Parameters
+        ----------
+        target_table : str
+            The table pull the first row from
+        pk_col_name : str
+            The name of the column for the primary key id.
+
+        Returns
+        -------
+        pk_id : int
+            The primary key id for the newly inserted row. Returns None if issue with inserting rows.
+        """
+        with self._conn.cursor() as cursor:
+            stmt = sql.SQL("""
+            SELECT
+                *
+            FROM
+                {table}
+            ORDER BY
+                {pk_col_name}
+            ASC LIMIT 1;""").format(
+                table=sql.Identifier(target_table),
+                pk_col_name=sql.Identifier(pk_col_name),
+            )
+            cursor.execute(stmt)
+            first_row = cursor.fetchone()
+
+        return first_row
 
     def read_last_row(self, target_table: str, pk_col_name: str) -> tuple:
         """
@@ -107,12 +139,12 @@ class BattDbTestHelper(Loader):
         """
         with self._conn.cursor() as cursor:
             stmt = sql.SQL("""
-            SELECT 
-                * 
-            FROM 
+            SELECT
+                *
+            FROM
                 {table}
-            ORDER BY 
-                {pk_col_name} 
+            ORDER BY
+                {pk_col_name}
             DESC LIMIT 1;""").format(
                 table=sql.Identifier(target_table),
                 pk_col_name=sql.Identifier(pk_col_name),
@@ -121,16 +153,16 @@ class BattDbTestHelper(Loader):
             last_row = cursor.fetchone()
 
         return last_row
-    
+
     def load_sil_data(self, df: pd.DataFrame) -> int:
         """
-        Loads the passed sil_data to the database. 
+        Loads the passed sil_data to the database.
 
         Parameters
         ----------
         df : pd.DataFrame
             Dataframe with data to load to `sil_data` table
-        
+
         Returns
         -------
         num_rows_loaded : int
@@ -141,13 +173,13 @@ class BattDbTestHelper(Loader):
 
     def load_sim_data(self, df: pd.DataFrame) -> int:
         """
-        Loads the passed sim_data to the database. 
+        Loads the passed sim_data to the database.
 
         Parameters
         ----------
         df : pd.DataFrame
             Dataframe with data to load to `sim_data` table
-        
+
         Returns
         -------
         num_rows_loaded : int
@@ -215,9 +247,9 @@ class BattDbTestHelper(Loader):
         '''
         with self._conn.cursor() as cursor:
             stmt = sql.SQL("""
-                DELETE FROM 
+                DELETE FROM
                     {table_name}
-                WHERE 
+                WHERE
                     {pk_col_name} = {pk_id}
             """).format(
                 table_name=sql.Identifier(target_table),
