@@ -29,7 +29,7 @@ LOG_FILE_PATH = os.path.join(LOG_DIR, LOG_FILE_NAME)
 # message: The logged message.
 logger = logging.getLogger('battetl')
 
-log_format_stream = f'"%(asctime)s [%(levelname)s][%(filename)s:%(lineno)d][%(name)s] %(message)s.{STREAM_LOG_MAX_LENGTH}s'
+log_format_stream = f'%(asctime)s [%(levelname)s][%(filename)s:%(lineno)d][%(name)s] %(message)s'
 formatter_stream = logging.Formatter(fmt=log_format_stream)
 handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter_stream)
