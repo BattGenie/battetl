@@ -1,0 +1,57 @@
+{
+    "timezone": "America/Los_Angeles",
+    "data_file_path": [
+        "/home/parsai/Documents/battgenie/BattSoft/BattETL/tests/data/maccor_cycler_data/simple_data/BG_Maccor_Testdata - 079.txt"
+    ],
+    "stats_file_path": [
+        "/home/parsai/Documents/battgenie/BattSoft/BattETL/tests/data/maccor_cycler_data/simple_data/BG_Maccor_TestData - 079 [STATS].txt"
+    ],
+    "schedule_file_path": [
+        "/home/parsai/Documents/battgenie/BattSoft/BattETL/tests/data/maccor_cycler_data/simple_data/BG_Maccor_Schedule.000"
+    ],
+    "meta_data": {
+        "test_meta": {
+            "test_name": "BG_Maccor_Testdata",
+            "start_date": "2020-10-06",
+            "end_date": "2020-10-11",
+            "channel": 79,
+            "ev_chamber": 12,
+            "comments": "Ran at 45 degrees C",
+            "test_capacity_mah": 2650
+        },
+        "cell": {
+            "batch_number": "BATCH_NUMBER",
+            "label": "24",
+            "date_received": "2020-09-01",
+            "manufacturer_sn": "BattGenie_SN"
+        },
+        "cell_meta": {
+            "manufacturer": "BattGenie",
+            "manufacturer_pn": "BattGenie_PN",
+            "form_factor": "pouch",
+            "capacity_mah": 2720,
+            "dimensions": "{\"x_mm\":\"54.25\", \"y_mm\":106.96, \"z_mm\":3.19}"
+        },
+        "schedule_meta": {
+            "schedule_name": "BG_Characterization_v1",
+            "test_type": "Characterization",
+            "cycler_make": "Maccor",
+            "date_created": "2020-10-06",
+            "created_by": "BattGenie"
+        },
+        "cycler": {
+            "sn": "SN",
+            "location": "BattGenie"
+        },
+        "cycler_meta": {
+            "manufacturer": "Maccor",
+            "model": "SERIES 4000M"
+        },
+        "customers": {
+            "customer_name": "FakeCustomer"
+        },
+        "projects": {
+            "project_name": "FakeProject"
+        }
+    }
+}

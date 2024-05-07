@@ -1,0 +1,28 @@
+/* Import from Google Fonts, a CDN, or files in your _static folder.
+   This Google Fonts import provides its own `@font-face` CSS;
+   if providing your own font files, you'll also need to
+   provide your own `@font-face` code. */
+   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+   /* Main font used throughout the docs. */
+   body {
+     font-family: "Inter", sans-serif;
+   }
+   
+   /* Code snippets. */
+   pre, code, kbd, samp {
+     font-family: "Courier New", monospace;
+   }
+
+    /* Custom CSS for the Sphinx theme. */
+    /* .wy-side-nav-search, .wy-nav-top {
+        background: #0b750a;
+    } */
+
+    :root {
+        --color-primary: #222A61;
+    }
+
+    .navbar, pre, .sphinx-wagtail-theme .bg-primary {
+        background-color: var(--color-primary) !important;
+    }

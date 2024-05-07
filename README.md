@@ -16,13 +16,14 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
 - [Usage](#usage)
   - [Quick Mode](#quick-mode)
     - [Unstructured data](#unstructured-data)
+  - [Command Line Interface (CLI)](#command-line)
   - [Config File](#config-file)
   - [Env File](#env-file)
   - [BattDB Version Check](#battdb-version-check)
   - [Data Export Requirements](#data-export-requirements)
     - [Maccor](#maccor)
     - [Arbin](#arbin)
-- [BattETL Process Overview](#battetl-process-overview)
+- [BattETL Overview](#battetl-overview)
   - [System Diagram](#system-diagram)
   - [Transformer](#transformer)
   - [Extractor](#extractor)
@@ -189,6 +190,41 @@ So, the command to run unstructured data would like the following:
 
 ```bash
 python -m battetl.battetl_quick file="TEST_DATA.txt" file_meta="file_meta.json" db_url="postgres://postgres:password@localhost:5454/battdb_quick"
+```
+
+
+### Command Line Interface
+BattETL supports running ETL through command line as well. To create config, following command can be run:
+
+`battetl -c "tests/data/maccor_cycler_data/simple_data"`
+-c = create config
+tests/data/maccor_cycler_data/simple_data = path of data directory relative to the root folder of battetl.
+While creating config, data directory is a required param
+
+BattETL Extract:
+```
+battetl -e 
+battetl -e "battetl/demo_config.json"
+```
+You have an option of providing config file. If a file is provided, it will be used as a config file. Else the file created from previous step will be used. Similarly, other commands can be run as shown below.
+
+
+BattETL Transform:
+```
+battetl -t 
+battetl -t "battetl/demo_config.json"
+```
+
+BattETL Load:
+```
+battetl -l 
+battetl -l "battetl/demo_config.json"
+```
+
+BattETL Extract, Transform, Load:
+```
+battetl -etl 
+battetl -etl "battetl/demo_config.json"
 ```
 
 ### Config File
@@ -410,6 +446,10 @@ To run the test suite, use the following commands:
 - Run Extractor tests: `pytest tests/test_extract_data.py`
 
 To show logs while testing, add the `-o log_cli=true` flag.
+
+## API Documentation 
+
+To regenerate the API documentation, run `docker compose -f docker-compose-battetl.yml up --build --force-recreate`. The generated documentation can be found in the `docs\build` directory and open the `index.html` in any web browser to view the documentation. 
 
 ## Troubleshooting
 
