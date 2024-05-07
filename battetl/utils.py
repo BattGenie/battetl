@@ -418,29 +418,32 @@ class Utils:
     def validate_file_meta(file_meta: dict) -> bool:
         """
         Validate file_meta
+        
         Parameters
         ----------
         file_meta : dict
             Dictionary containing the meta data for the file.
             For example:
-            ```json
-            {
-                "voltage_mv" : 
+            
+            .. code-block:: python
+            
                 {
-                    "column_name":"volt",
-                    "scaling_factor":1,
-                },
-                "current_ma" : 
-                {
-                    "column_name":"curr",
-                    "scaling_factor":1,
-                },
-            }
-            ```
+                    "voltage_mv" : 
+                    {
+                        "column_name":"volt",
+                        "scaling_factor":1,
+                    },
+                    "current_ma" : 
+                    {
+                        "column_name":"curr",
+                        "scaling_factor":1,
+                    },
+                }
+        
         Returns
         -------
         bool
-            True if valid
+            True if the file_meta is valid.
         """
         # Check file_meta contains all required keys
         for key in Constants.UNSTRUCTURED_DATA_REQUIRED_KEYS:

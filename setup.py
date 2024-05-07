@@ -1,5 +1,7 @@
 import setuptools
+import os
 
+os.chdir(os.path.abspath(os.path.dirname(__file__)))
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
@@ -8,8 +10,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="battetl",
-    version="1.1.13",
-    author="Zander Nevitt, Bing Syuan Wang, Eric Ravet, and Chintan Pathak",
+    version="1.1.15",
+    author="Zander Nevitt, Bing Syuan Wang, Eric Ravet, Aditya Parsai and Chintan Pathak",
     author_email="info@battgenie.life",
     description="A Python module for extracting, transforming, and loading battery data to a database.",
     long_description=long_description,
@@ -24,4 +26,10 @@ setuptools.setup(
     ],
     python_requires='>=3.9, <3.12',
     license='MIT',
+    include_package_data=True,
+    entry_points={
+        'console_scripts': [
+            'battetl = battetl:run_battetl',
+        ]
+    }
 )

@@ -5,19 +5,26 @@
 # Use the official image as a parent image.
 FROM python:3.10-slim-buster
 
+RUN apt-get update && apt-get install -y build-essential
+
 # Set the working directory.
 WORKDIR /app
 
 # Copy the file from your host to your current location.
 COPY requirements.txt requirements.txt
 
-# Run the command inside your image filesystem.
-RUN pip3 install -r requirements.txt
+# Install documentation dependencies
+RUN pip install sphinx sphinx-wagtail-theme myst-parser sphinx_markdown_tables
 
 RUN echo "Will now copy all the code from the repo in the container"
 
 # Copy the rest of your app's source code from your host to your image filesystem.
 COPY . .    
 
+# Run the command inside your image filesystem.
+RUN pip3 install -r requirements.txt
+
 # Run the specified command within the container.
 RUN pip install -e .
+
+CMD [ "bash" ]

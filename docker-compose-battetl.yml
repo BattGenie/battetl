@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  battetl:
+    build:
+      context: .
+      dockerfile: Dockerfile_battetl
+    volumes:
+      - ./docs:/app/docs
+      - ./battetl:/app/battetl
+    command: ["sh", "-c", "sphinx-apidoc -o docs/source battetl && make -C docs clean html"]

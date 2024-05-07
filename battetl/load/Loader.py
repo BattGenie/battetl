@@ -1181,6 +1181,10 @@ class Loader:
             logger.error(e)
             if target_table == 'test_data':
                 raise e
+            # Database connection may have been lost, re-create connection
+            logger.info('Re-creating connection to database')
+            self._conn.close()
+            self.__create_connection()
 
         return num_rows_inserted
 
