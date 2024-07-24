@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/BattGenie/battetl/main/images/BattETL_Logo.png">
 
-# BattETL
+# BattETL [![Documentation Status](https://readthedocs.org/projects/battetl/badge/?version=latest)](https://battetl.readthedocs.io/en/latest/?badge=latest)
 
 BattETL is a well-tested and an enterprise-ready python module for **E**xtracting, **T**ransforming, and **L**oading battery cycler data to a [database](https://github.com/BattGenie/battdb). BattETL can also be used just for data extraction and transformation if a database is not desired. Currently data from Maccor and Arbin cyclers are supported.
 
