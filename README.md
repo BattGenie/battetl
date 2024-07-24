@@ -8,28 +8,42 @@ BattETL is a well-tested and an enterprise-ready python module for **E**xtractin
 
 ## Overview
 
-- [Motivation](#motivation)
-- [Video Guides](#video-guides)
-- [Installation](#installation)
-  - [Requirements](#requirements)
-  - [Installation Instructions](#installation-instructions)
-- [Usage](#usage)
-  - [Quick Mode](#quick-mode)
-    - [Unstructured data](#unstructured-data)
-  - [Command Line Interface (CLI)](#command-line)
-  - [Config File](#config-file)
-  - [Env File](#env-file)
-  - [BattDB Version Check](#battdb-version-check)
-  - [Data Export Requirements](#data-export-requirements)
-    - [Maccor](#maccor)
-    - [Arbin](#arbin)
-- [BattETL Overview](#battetl-overview)
-  - [System Diagram](#system-diagram)
-  - [Transformer](#transformer)
-  - [Extractor](#extractor)
-  - [Loader](#loader)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
+- [BattETL](#battetl)
+  - [Overview](#overview)
+  - [Motivation](#motivation)
+    - [Why another battery cycler data ingesting tool?](#why-another-battery-cycler-data-ingesting-tool)
+    - [Some features of BattETL](#some-features-of-battetl)
+  - [Video Guides](#video-guides)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+      - [Software Requirements](#software-requirements)
+      - [Hardware Requirements](#hardware-requirements)
+    - [Installation Instructions](#installation-instructions)
+  - [Usage](#usage)
+    - [Quick Mode](#quick-mode)
+      - [Unstructured data](#unstructured-data)
+    - [Command Line Interface (CLI)](#command-line-interface-cli)
+    - [Config File](#config-file)
+      - [Cell Thermocouple (optional)](#cell-thermocouple-optional)
+    - [Env File](#env-file)
+    - [BattDB Version Check](#battdb-version-check)
+    - [Data Export Requirements](#data-export-requirements)
+      - [Maccor](#maccor)
+      - [Arbin](#arbin)
+  - [BattETL Overview](#battetl-overview)
+    - [System Diagram](#system-diagram)
+    - [Extractor](#extractor)
+      - [Functions](#functions)
+      - [Variables](#variables)
+    - [Transformer](#transformer)
+      - [Functions](#functions-1)
+      - [Variables](#variables-1)
+    - [Loader](#loader)
+      - [Functions](#functions-2)
+  - [Testing](#testing)
+  - [API Documentation](#api-documentation)
+  - [Troubleshooting](#troubleshooting)
+    - [pip install psycopg2 error](#pip-install-psycopg2-error)
 
 ## Motivation
 
@@ -126,7 +140,7 @@ BattETL provides a Quick Mode, which automatically detects whether the given fil
 python -m battetl.battetl_quick file="TEST_DATA.txt" db_url="postgres://postgres:password@localhost:5454/battdb_quick"
 ```
 
-This command relies on [BattDB](https://github.com/BattGenie/BattDB). If BattDB does not exist, a database will be created using Docker Compose and the data will be uploaded to it. The command also returns a harmonized Pandas dataframe that can be used for analysis and visualization. 
+This command relies on [BattDB](https://github.com/BattGenie/BattDB). If BattDB does not exist, a database will be created using Docker Compose and the data will be uploaded to it. The command also returns a harmonized Pandas dataframe that can be used for analysis and visualization.
 
 #### Unstructured data
 
@@ -178,11 +192,11 @@ Where:
 
 - `new_column_name` is the new name of the column that should be set in the dataframe, e.g. `voltage_mv`
 - `existing_column_name` is the existing column name that should be changed to the `new_column_name`
-- `scaling_factor` *optional* provides an optional multiplicative scaling to use to scale the column value ot the desired units. 
+- `scaling_factor` *optional* provides an optional multiplicative scaling to use to scale the column value ot the desired units.
 
 A few notes:
 
-- Column decoders must be included for `voltage_mv`, `current_ma`, and `test_time_s` or `recorded_datetime` so as to match the database schema. 
+- Column decoders must be included for `voltage_mv`, `current_ma`, and `test_time_s` or `recorded_datetime` so as to match the database schema.
 - Any column can be transformed, even it is to a name that does not exist in the database schema.
 - Any column name does that does not exist in the `test_data` table will be loaded in the `other_details` column
 
@@ -192,8 +206,8 @@ So, the command to run unstructured data would like the following:
 python -m battetl.battetl_quick file="TEST_DATA.txt" file_meta="file_meta.json" db_url="postgres://postgres:password@localhost:5454/battdb_quick"
 ```
 
+### Command Line Interface (CLI)
 
-### Command Line Interface
 BattETL supports running ETL through command line as well. To create config, following command can be run:
 
 `battetl -c "tests/data/maccor_cycler_data/simple_data"`
@@ -202,27 +216,31 @@ tests/data/maccor_cycler_data/simple_data = path of data directory relative to t
 While creating config, data directory is a required param
 
 BattETL Extract:
-```
+
+```shell
 battetl -e 
 battetl -e "battetl/demo_config.json"
 ```
+
 You have an option of providing config file. If a file is provided, it will be used as a config file. Else the file created from previous step will be used. Similarly, other commands can be run as shown below.
 
-
 BattETL Transform:
-```
+
+```shell
 battetl -t 
 battetl -t "battetl/demo_config.json"
 ```
 
 BattETL Load:
-```
+
+```shell
 battetl -l 
 battetl -l "battetl/demo_config.json"
 ```
 
 BattETL Extract, Transform, Load:
-```
+
+```shell
 battetl -etl 
 battetl -etl "battetl/demo_config.json"
 ```
@@ -294,6 +312,7 @@ The .env contains the associated database credentials and is formatted as follow
 
 ```text
 ENV=dev # dev, prod
+# BATTVIZ_URL=YOUR_BATTVIZ_URL
 DB_TARGET=YOUR_DATABASE_NAME
 DB_USERNAME=YOUR_USERNAME
 DB_PASSWORD=YOUR_PASSWORD
@@ -305,13 +324,15 @@ DB_PORT=5432
 # DB_SSLKEY=PATH_TO_CLIENT_KEY
 ```
 
+`BATTVIZ_URL` is optional. If it is provided, the BattETL will show the link to BattViz dashboard in the logs.
+
 An example .env file is given within `examples/.env.example`
 
 ### BattDB Version Check
 
 A version check was added to make sure that the correct database migrations have been applied before BattETL tries to load data into the database to ease safe schema updates. Please update the `battetl/constants.py` lines below with the latest schema version:
 
-```    
+```python
 BATTDB_SCHEMA_VERSION = 9.1
 BATTDB_QUICK_SCHEMA_VERSION = 1.1
 ```
@@ -376,7 +397,7 @@ After running BattETL on a specific configuration file the following objects wil
 - `cycle_stats: pandas.DataFrame`: The transformed cycle stats after normalizing units, datatypes, and calculating supplemental cycle statistics.
 - `schedule: dict`: The procedure/schedule file and all associated files in a nested Dictionary.
 
-### System diagram
+### System Diagram
 
 <img src="https://raw.githubusercontent.com/BattGenie/battetl/main/images/BattETL_SystemDiagram.svg">
 
@@ -447,7 +468,7 @@ To run the test suite, use the following commands:
 
 To show logs while testing, add the `-o log_cli=true` flag.
 
-## API Documentation 
+## API Documentation
 
 To regenerate the API documentation, run `docker compose -f docker-compose-battetl.yml up --build --force-recreate`. The generated documentation can be found in the `docs\build` directory and open the `index.html` in any web browser to view the documentation. 
 
