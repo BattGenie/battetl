@@ -1,0 +1,4 @@
+sphinx
+sphinx_markdown_tables
+myst-parser
+sphinx-wagtail-theme
