@@ -25,6 +25,9 @@ class Constants:
     PREFIX_MACCOR_THERMOCOUPLE = 'temp '
     TEMPLATE_RENAMED_THERMOCOUPLE = 'thermocouple_X_c'
 
+    BATTVIZ_TEST_DATA_PATH = 'd/Test-Data/test-data'
+    BATTVIZ_CYCLE_STATS_PATH = 'd/cycling-results/cycling-results'
+
     COLUMNS_TEST_DATA = {
         'test_data_id',
         'test_id',

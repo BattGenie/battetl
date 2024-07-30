@@ -170,6 +170,7 @@ class Loader:
                 # Re-create connection
                 self.__create_connection()
 
+            test_id = self._lookup_test_id()
             latest_unixtime_s = self.__lookup_latest_unixtime()
             if latest_unixtime_s:
                 logger.info(f'Data rows to load: {df_copy.shape[0]}')
@@ -189,7 +190,6 @@ class Loader:
                             f'Dropping column {column} from DataFrame')
                         df_copy = df_copy.drop([column], axis=1)
 
-                test_id = self._lookup_test_id()
                 if not test_id:
                     test_id = self.__insert_test_meta()
                 df_copy['test_id'] = np.ones(
@@ -202,7 +202,17 @@ class Loader:
                 self.__update_first_and_last_recorded_datetime(test_id)
             else:
                 logger.info(
-                    f'No new data to load to test_data table for test_id')
+                    f'No new data to load to test_data table for test_id {test_id}')
+
+            # Show BattViz URL for test data
+            battviz_url = os.getenv('BATTVIZ_URL')
+            if battviz_url and test_id:
+                first_recorded_datetime, last_recorded_datetime = self.__lookup_first_and_last_recorded_datetime(
+                    test_id)
+                first_recorded_datetime = first_recorded_datetime.timestamp() * 1000
+                last_recorded_datetime = last_recorded_datetime.timestamp() * 1000
+                test_data_url = f'{battviz_url}/{Constants.BATTVIZ_TEST_DATA_PATH}?var-test_id={test_id}&from={first_recorded_datetime:.0f}&to={last_recorded_datetime:.0f}'
+                logger.info(f'View test data in BattViz: {test_data_url}')
 
         except Exception as e:
             logger.error('Error loading test data')
@@ -312,6 +322,12 @@ class Loader:
                 cursor.execute(stmt)
             logger.info(
                 f'Deleted old cycle_stats data for test_id {test_id} where cycle was greater than {df_copy.cycle.iloc[0]}')
+
+        # Show BattViz URL for cycle stats
+        battviz_url = os.getenv('BATTVIZ_URL')
+        if battviz_url and self.config['test_meta']['test_name']:
+            cycle_stats_url = f'{battviz_url}/{Constants.BATTVIZ_CYCLE_STATS_PATH}?var-test_names={self.config["test_meta"]["test_name"]}'
+            logger.info(f'View cycle stats in BattViz: {cycle_stats_url}')
 
         return num_rows_inserted
 
@@ -1187,6 +1203,44 @@ class Loader:
             self.__create_connection()
 
         return num_rows_inserted
+
+    def __lookup_first_and_last_recorded_datetime(self, test_id):
+        """
+        Fetches the first_recorded_datetime and last_recorded_datetime for the test
+
+        Parameters
+        ----------
+        test_id : int
+            The test_id for the test to update.
+
+        Returns
+        -------
+        first_recorded_datetime : datetime
+            The first recorded datetime for the test.
+        last_recorded_datetime : datetime
+            The last recorded datetime for the test.
+        """
+        with self._conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    first_recorded_datetime, last_recorded_datetime
+                FROM
+                    test_meta
+                WHERE
+                    test_id = %(test_id)s
+            """, {
+                'test_id': str(test_id)
+            })
+            result = cursor.fetchone()
+
+        if result:
+            first_recorded_datetime = result[0]
+            last_recorded_datetime = result[1]
+        else:
+            first_recorded_datetime = None
+            last_recorded_datetime = None
+
+        return first_recorded_datetime, last_recorded_datetime
 
     def __update_first_and_last_recorded_datetime(self, test_id):
         """
