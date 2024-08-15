@@ -143,20 +143,46 @@ class Extractor:
         if not os.path.exists(path):
             raise FileNotFoundError(f'Unable to load file {path}')
 
-        # Check file_meta contains all required keys
-        Utils.validate_file_meta(file_meta)
+        # Check if file extension is csv or xlsx
+        if not path.endswith('.csv') and not path.endswith('.xlsx'):
+            raise ValueError(f'Unsupported file extension: {path}. Currently, only files with extension .csv and .xlsx are supported.')
+        
+        if path.endswith('.csv'):
+            logger.info(f'Importing CSV file {path}')
+            # Check file_meta contains all required keys
+            Utils.validate_file_meta(
+                file_meta=file_meta, 
+                file_type='csv')
 
-        df = pd.read_csv(path, **file_meta['pandas_read_csv_args'])
+            df = pd.read_csv(path, **file_meta['pandas_read_csv_args'])
 
-        self.raw_test_data = pd.concat(
-            [
-                self.raw_test_data,
-                df
-            ],
-            ignore_index=True
-        )
-        logger.debug(
-            f'Update raw_test_data. Total rows: {self.raw_test_data.shape[0]}')
+            self.raw_test_data = pd.concat(
+                [
+                    self.raw_test_data,
+                    df
+                ],
+                ignore_index=True
+            )
+            logger.debug(
+                f'Update raw_test_data. Total rows: {self.raw_test_data.shape[0]}')
+        elif path.endswith('.xlsx'):
+            logger.info(f'Importing XLSX file {path}')
+            # Check file_meta contains all required keys
+            Utils.validate_file_meta(
+                file_meta=file_meta, 
+                file_type='xlsx')
+            
+            df = pd.read_excel(path, **file_meta['pandas_read_excel_args'])
+
+            self.raw_test_data = pd.concat(
+                [
+                    self.raw_test_data,
+                    df
+                ],
+                ignore_index=True
+            )
+            logger.debug(
+                f'Update raw_test_data. Total rows: {self.raw_test_data.shape[0]}')
 
         return df
 

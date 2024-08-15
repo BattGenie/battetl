@@ -44,7 +44,7 @@ class QuickLoader(Loader):
                 }
             }
         }
-        super().__init__(config=config, battdb_version=Constants.BATTDB_QUICK_SCHEMA_VERSION)
+        super().__init__(config=config)
 
     def load_test_data(self, df: pd.DataFrame, retry_cnt: int = 0) -> int:
         """

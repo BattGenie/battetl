@@ -415,7 +415,7 @@ class Utils:
             return float(value.replace(',', ''))
         return value
     
-    def validate_file_meta(file_meta: dict) -> bool:
+    def validate_file_meta(file_meta: dict, file_type: str) -> bool:
         """
         Validate file_meta
         
@@ -439,6 +439,8 @@ class Utils:
                         "scaling_factor":1,
                     },
                 }
+        file_type : str
+            Type of file. Valid values are 'csv' and 'xlsx'.
         
         Returns
         -------
@@ -446,11 +448,18 @@ class Utils:
             True if the file_meta is valid.
         """
         # Check file_meta contains all required keys
-        for key in Constants.UNSTRUCTURED_DATA_REQUIRED_KEYS:
-            if key not in file_meta:
-                raise ValueError(
-                    f'file_meta does not contain required key: {key}')
-
+        if file_type == 'csv':
+            for key in Constants.UNSTRUCTURED_DATA_REQUIRED_KEYS_CSV:
+                if key not in file_meta:
+                    raise ValueError(
+                        f'file_meta does not contain required key: {key}')
+        elif file_type == 'xlsx':
+            for key in Constants.UNSTRUCTURED_DATA_REQUIRED_KEYS_XLSX:
+                if key not in file_meta:
+                    raise ValueError(
+                        f'file_meta does not contain required key: {key}')
+        else:
+            raise ValueError(f'Invalid file type: {file_type}')
         return True
 
 
