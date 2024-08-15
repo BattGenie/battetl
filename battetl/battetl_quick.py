@@ -44,12 +44,20 @@ def battetl_quick(file_path: str, file_meta = None) -> pd.DataFrame:
         try:
             transformer.transform_test_data(raw_test_data, file_meta)
             test_data = transformer.test_data
+            if 'test_time_s' in test_data.columns:
+                test_data = convert_time_to_seconds(test_data, 'test_time_s')
+            if 'step_time_s' in test_data.columns:
+                test_data = convert_time_to_seconds(test_data, 'step_time_s')
         except Exception as e:
             logger.error('Failed to transform test data', exc_info=True)
     elif not raw_cycle_stats.empty:
         try:
             transformer.transform_cycle_stats(raw_cycle_stats)
             cycle_stats = transformer.cycle_stats
+            if 'test_time_s' in cycle_stats.columns:
+                cycle_stats = convert_time_to_seconds(cycle_stats, 'test_time_s')
+            if 'step_time_s' in cycle_stats.columns:
+                cycle_stats = convert_time_to_seconds(cycle_stats, 'step_time_s')
         except Exception as e:
             logger.error('Failed to transform cycle stats', exc_info=True)
 
@@ -76,6 +84,24 @@ def battetl_quick(file_path: str, file_meta = None) -> pd.DataFrame:
     else:
         return pd.DataFrame()
 
+def convert_time_to_seconds(df: pd.DataFrame, column_name: str):
+    '''
+    Converts a column of time values in the format 0:00:00.000 to seconds.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to be processed.
+    column_name : str
+        The name of the column to be converted.
+    '''
+    if column_name in df.columns:
+        # Use first value to check format
+        test_time_s_0 = df[column_name].iloc[0]
+        if re.match(r'\d+:\d+:\d+.\d+', test_time_s_0):
+            df[column_name] = df[column_name].apply(
+                lambda x: pd.to_timedelta(x).total_seconds())
+    return df
 
 def clone_battdb(battdb_folder: str = 'battdb'):
     '''

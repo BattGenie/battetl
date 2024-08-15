@@ -1,7 +1,7 @@
 class Constants:
     DEFAULT_TIME_ZONE = 'America/Los_Angeles'
 
-    BATTDB_SCHEMA_VERSION = 11.1
+    BATTDB_SCHEMA_VERSION = 11.2
     BATTDB_QUICK_SCHEMA_VERSION = 1.1
 
     DATABASE_MAX_RETRIES = 10
@@ -298,8 +298,13 @@ class Constants:
         'time_s',
         'other_details',
     }
-    UNSTRUCTURED_DATA_REQUIRED_KEYS = {
+    UNSTRUCTURED_DATA_REQUIRED_KEYS_CSV = {
         'voltage_mv',
         'current_ma',
-        'pandas_read_csv_args'
+        'pandas_read_csv_args',
+    }
+    UNSTRUCTURED_DATA_REQUIRED_KEYS_XLSX = {
+        'voltage_mv',
+        'current_ma',
+        'pandas_read_excel_args',
     }

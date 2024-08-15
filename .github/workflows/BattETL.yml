@@ -68,8 +68,8 @@ jobs:
           POSTGRES_PORT: 5432
           FLYWAY_SQL: ../migration_scripts
         run: |
-          docker-compose -f battdb/assets/battdb_docker/docker-compose.yml run flyway
-          docker-compose -f battdb/assets/battdb_docker/docker-compose.yml up -d
+          docker compose -f battdb/assets/battdb_docker/docker-compose.yml run flyway
+          docker compose -f battdb/assets/battdb_docker/docker-compose.yml up -d
 
       # Exclude the 'battdb' folder as it generates the 'data' folder for Docker,
       # which may cause permission issues when trying to read it in pytest.

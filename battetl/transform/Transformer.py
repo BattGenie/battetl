@@ -148,12 +148,13 @@ class Transformer:
         if not file_meta.get('current_ma'):
             raise ValueError(
                 f'Current column name does not exist: `current_ma`')
-        if not file_meta.get('test_time_s') or file_meta.get('recorded_datetime'):
+        if not file_meta.get('test_time_s') and not file_meta.get('recorded_datetime'):
             raise ValueError(
                 f'Required to have either `test_time_s` or `recorded_datetime` column!')
 
-        # Remove the `pandas_read_csv_args` dictionary if it is there
-        file_meta.pop("pandas_read_csv_args", None)
+        # Remove `pandas_read_csv_args` and `pandas_read_excel_args` if they exist
+        file_meta.pop('pandas_read_csv_args', None)
+        file_meta.pop('pandas_read_excel_args', None)
 
         # Rename columns
         columns_mappings = {}
@@ -168,6 +169,8 @@ class Transformer:
                     file_meta.get(column).get('scaling_factor')
 
         df = self.__convert_data_type(df)
+        
+        df = self.__convert_datetime_unixtime(df)
 
         return df
 
