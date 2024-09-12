@@ -476,17 +476,17 @@ class Loader:
 
         if result:
             version = float(result[0])
-            if version == battdb_version:
+            if version >= battdb_version:
                 valid = True
                 logger.info(
-                    f'BattDB schema version {result[0]} found in database')
+                    f'BattDB schema version {result[0]} found in database and should be greater than or equal to {battdb_version} ')
+#            else:
+#                if version > battdb_version:
+#                    err = f'BattDB schema version {result[0]} found in database is newer than expected version {battdb_version}. Please update BattETL.'
+#                    logger.error(err)
             else:
-                if version > battdb_version:
-                    err = f'BattDB schema version {result[0]} found in database is newer than expected version {battdb_version}. Please update BattETL.'
-                    logger.error(err)
-                else:
-                    err = f'BattDB schema version {result[0]} found in database is older than expected version {battdb_version}. Please update BattDB.'
-                    logger.error(err)
+                err = f'BattDB schema version {result[0]} found in database is older than expected version {battdb_version}. Please update BattDB.'
+                logger.error(err)
         else:
             logger.error(f'No BattDB schema version found in database')
 
